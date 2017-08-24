@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.hejinyo.system.dao.SysPermissionDao">
+
+    <resultMap id="BasePermissionMap" type="syspermission">
+        <id column="perm_id" jdbcType="INTEGER" property="permId"/>
+        <result column="res_code" jdbcType="VARCHAR" property="resCode"/>
+        <result column="perm_code" jdbcType="VARCHAR" property="permCode"/>
+        <result column="perm_name" jdbcType="VARCHAR" property="permName"/>
+        <result column="perm_url" jdbcType="VARCHAR" property="permUrl"/>
+        <result column="state" jdbcType="INTEGER" property="state"/>
+        <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
+        <result column="create_id" jdbcType="INTEGER" property="createId"/>
+    </resultMap>
+
+    <sql id="Base_Permission_List">
+        perm_id, res_code, perm_code, perm_name, perm_url, state, create_time, create_id
+    </sql>
+
+    <select id="getUserPermisSet" resultType="String" parameterType="int">
+        select concat(sp.res_code, ':', sp.perm_code) perm_code
+        	from sys_user_role sur
+        	left join sys_role sr on sr.role_id = sur.role_id
+        	left join sys_role_resource srr on srr.role_id=sr.role_id
+        	left join sys_permission sp on sp.perm_id = srr.perm_id
+        where sur.user_id = #{userId}
+    </select>
+
+</mapper>

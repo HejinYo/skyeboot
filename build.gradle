@@ -1,0 +1,72 @@
+buildscript {
+    ext {
+        springBootVersion = '1.5.6.RELEASE'
+    }
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
+    }
+}
+
+//当前所有项目通用配置
+allprojects {
+    apply plugin: 'java'
+    apply plugin: 'idea'
+
+    // 设置 JDK 版本
+    sourceCompatibility = 1.8 //指定编译编译.java文件的jdk版本
+    targetCompatibility = 1.8 //确保class文件与targetCompatibility指定版本，或者更新的java虚拟机兼容
+
+    repositories {
+        mavenLocal()
+        maven { url "http://maven.aliyun.com/nexus/content/groups/public" }
+        mavenCentral()
+    }
+
+    // java编译的时候缺省状态下会因为中文字符而失败
+    [compileJava, compileTestJava, javadoc]*.options*.encoding = 'UTF-8'
+}
+
+// 子项目的通用配置
+subprojects {
+    apply plugin: 'org.springframework.boot'
+
+    dependencies {
+        // 通用依赖
+        compile('com.alibaba:fastjson:1.2.36')
+        compileOnly('org.projectlombok:lombok:1.16.18')
+
+        // 测试依赖
+        compile('junit:junit:4.12')
+    }
+    //打包的时候 src内的所有的xml文件
+    sourceSets {
+        main {
+            java {
+                srcDirs = ['src/main/java']
+            }
+            resources {
+                srcDirs = ['src/main/java', 'src/main/resources']
+            }
+        }
+    }
+
+    // 显示当前项目下所有用于 compile 的 jar.
+    task listJars(description: 'Display all compile jars.') {
+        doLast {
+            configurations.compile.each { File file -> println file.name }
+        }
+    }
+}
+
+//编译打包时，打印出警告和错误详细位信息
+allprojects {
+    gradle.projectsEvaluated {
+        tasks.withType(JavaCompile) {
+            options.compilerArgs << "-Xlint:unchecked" << "-Xlint:deprecation"
+        }
+    }
+}
+

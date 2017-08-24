@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.hejinyo.system.dao.SysUserDao">
+
+    <resultMap id="BaseSysUserMap" type="sysuser">
+        <id column="user_id" jdbcType="INTEGER" property="userId"/>
+        <result column="user_name" jdbcType="VARCHAR" property="userName"/>
+        <result column="user_pwd" jdbcType="VARCHAR" property="userPwd"/>
+        <result column="user_salt" jdbcType="VARCHAR" property="userSalt"/>
+        <result column="email" jdbcType="VARCHAR" property="email"/>
+        <result column="phone" jdbcType="VARCHAR" property="phone"/>
+        <result column="login_ip" jdbcType="VARCHAR" property="loginIp"/>
+        <result column="login_time" jdbcType="TIMESTAMP" property="loginTime"/>
+        <result column="state" jdbcType="INTEGER" property="state"/>
+        <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
+        <result column="create_id" jdbcType="INTEGER" property="createId"/>
+    </resultMap>
+
+    <sql id="Base_User_List">
+        user_id, user_name, user_pwd, user_salt, email, phone,
+        login_ip, login_time, state, create_time, create_id
+    </sql>
+
+    <!-- 执行登录，查询用户登录信息 -->
+    <select id="getCurrentUser" resultType="currentuserdto" parameterType="String">
+        SELECT
+            user_id,
+            user_name,
+            user_pwd,
+            user_salt,
+            email,
+            phone,
+            login_ip,
+            login_time,
+            state,
+            create_time,
+            create_id
+        FROM sys_user
+        WHERE
+            user_name = #{username}
+    </select>
+
+    <!-- 分页查询用户 -->
+    <select id="listPage" resultMap="BaseSysUserMap" parameterType="java.util.Map">
+        SELECT
+        user_id, user_name, user_pwd, user_salt, email, phone, login_ip,
+        login_time, state, create_time, create_id
+        FROM sys_user
+        <where>
+            <trim prefix="" suffix="" prefixOverrides="and">
+                <if test="query.userName != null">and user_name=#{query.userName}</if>
+                <if test="query.userPwd != null">and user_pwd=#{query.userPwd}</if>
+                <if test="query.userSalt != null">and user_salt=#{query.userSalt}</if>
+                <if test="query.email != null">and email=#{query.email}</if>
+                <if test="query.phone != null">and phone=#{query.phone}</if>
+                <if test="query.loginIp != null">and login_ip=#{query.loginIp}</if>
+                <if test="query.loginTime != null">and login_time=#{query.loginTime}</if>
+                <if test="query.state != null">and state=#{query.state}</if>
+                <if test="query.createTime != null">and create_time=#{query.createTime}</if>
+                <if test="query.createId != null">and create_id=#{query.createId}</if>
+            </trim>
+        </where>
+        <if test="ord.userName != null">order by user_name ${order}</if>
+        <if test="ord.userPwd != null">order by user_pwd ${order}</if>
+        <if test="ord.userSalt != null">order by user_salt ${order}</if>
+        <if test="ord.email != null">order by email ${order}</if>
+        <if test="ord.phone != null">order by phone ${order}</if>
+        <if test="ord.loginIp != null">order by login_ip ${order}</if>
+        <if test="ord.loginTime != null">order by login_time ${order}</if>
+        <if test="ord.state != null">order by state ${order}</if>
+        <if test="ord.createTime != null">order by create_time ${order}</if>
+        <if test="ord.createId != null">order by create_id ${order}</if>
+    </select>
+
+    <!-- 添加用户 -->
+    <insert id="save" parameterType="sysuser" useGeneratedKeys="true" keyProperty="userId">
+        insert into sys_user
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="userName != null">user_name,</if>
+            <if test="userPwd != null">user_pwd,</if>
+            <if test="userSalt != null">user_salt,</if>
+            <if test="email != null">email,</if>
+            <if test="phone != null">phone,</if>
+            <if test="loginIp != null">login_ip,</if>
+            <if test="loginTime != null">login_time,</if>
+            <if test="state != null">state,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="createId != null">create_id,</if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="userName != null">#{userName},</if>
+            <if test="userPwd != null">#{userPwd},</if>
+            <if test="userSalt != null">#{userSalt},</if>
+            <if test="email != null">#{email},</if>
+            <if test="phone != null">#{phone},</if>
+            <if test="loginIp != null">#{loginIp},</if>
+            <if test="loginTime != null">#{loginTime},</if>
+            <if test="state != null">#{state},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="createId != null">#{createId},</if>
+        </trim>
+    </insert>
+
+    <!-- 用户名是否存在 -->
+
+    <select id="isExistUserName" resultType="int" parameterType="String">
+        SELECT count(user_name)
+        FROM sys_user
+        WHERE user_name = #{userName}
+    </select>
+
+    <!-- 获得用户编号对应的用户信息 -->
+    <select id="get" resultMap="BaseSysUserMap" parameterType="Integer">
+        SELECT
+            user_id,
+            user_name,
+            user_pwd,
+            user_salt,
+            email,
+            phone,
+            login_ip,
+            login_time,
+            state,
+            create_time,
+            create_id
+        FROM sys_user
+        WHERE
+            user_id = #{userId}
+    </select>
+
+    <update id="update" parameterType="sysuser">
+        update sys_user
+        <set>
+            <if test="userName != null">user_name = #{userName},</if>
+            <if test="userPwd != null">user_pwd = #{userPwd},</if>
+            <if test="userSalt != null">user_salt = #{userSalt},</if>
+            <if test="email != null">email = #{email},</if>
+            <if test="phone != null">phone = #{phone},</if>
+            <if test="loginIp != null">login_ip = #{loginIp},</if>
+            <if test="loginTime != null">login_time = #{loginTime},</if>
+            <if test="state != null">state = #{state},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="createId != null">create_id = #{createId},</if>
+        </set>
+        where user_id = #{userId}
+    </update>
+
+    <delete id="delete" parameterType="Integer">
+        DELETE FROM sys_user
+        WHERE user_id = #{userId}
+    </delete>
+
+</mapper>
