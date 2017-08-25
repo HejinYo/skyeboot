@@ -34,12 +34,13 @@ spring:
         reset-enable: false
         login-username: admin
         login-password: 123456
+      aop-patterns: cn.hejinyo.service.*
       # Spring监控配置，说明请参考Druid Github Wiki，配置_Druid和Spring关联监控配置
       #spring.datasource.druid.aop-patterns= # Spring监控AOP切入点，如x.y.z.service.*,配置多个英文逗号分隔
       # 如果spring.datasource.druid.aop-patterns要代理的类没有定义interface请设置spring.aop.proxy-target-class=true
 mybatis:
-  type-aliases-package: cn.hejinyo.system.model,cn.hejinyo.model
-  mapper-locations: classpath*:cn/hejinyo/**/*Dao.xml
+  type-aliases-package: cn.hejinyo.model
+  mapper-locations: classpath*:cn/hejinyo/dao/*Dao.xml
   configuration:
     use-generated-keys: true
     map-underscore-to-camel-case: true

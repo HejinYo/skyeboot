@@ -7,6 +7,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.HttpMediaTypeNotSupportedException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -38,14 +39,17 @@ public class ExceptionHandle {
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     @ExceptionHandler(value = {Exception.class})
     public Result exception(Exception ex, HttpServletResponse response) {
-        logger.error("系统发生异常={}", ex);
         if (ex instanceof HttpMessageNotReadableException) {
-            return Result.error(-1, HttpStatus.BAD_REQUEST.value());
+            return Result.error(HttpStatus.BAD_REQUEST.getReasonPhrase());
         } else if (ex instanceof HttpRequestMethodNotSupportedException) {
-            return Result.error(-1, HttpStatus.METHOD_NOT_ALLOWED.value());
+            return Result.error(HttpStatus.METHOD_NOT_ALLOWED.getReasonPhrase());
         } else if (ex instanceof HttpMediaTypeNotSupportedException) {
-            return Result.error(-1, HttpStatus.UNSUPPORTED_MEDIA_TYPE.value());
+            return Result.error(HttpStatus.UNSUPPORTED_MEDIA_TYPE.getReasonPhrase());
+        } else if (ex instanceof MethodArgumentNotValidException) {
+            MethodArgumentNotValidException mnve = (MethodArgumentNotValidException) ex;
+            return Result.error(mnve.getBindingResult().getFieldError().getDefaultMessage());
         }
-        return Result.error(-1, "未知错误:" + ex.getMessage());
+        logger.error("系统发生未知错误异常", ex);
+        return Result.error("未知错误:" + ex.getMessage());
     }
 }

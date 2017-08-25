@@ -4,7 +4,7 @@ import cn.hejinyo.shiro.token.StatelessAuthcToken;
 import cn.hejinyo.consts.StatusCode;
 import cn.hejinyo.consts.UserToken;
 import cn.hejinyo.exception.InfoException;
-import cn.hejinyo.system.model.dto.CurrentUserDTO;
+import cn.hejinyo.model.dto.CurrentUserDTO;
 import cn.hejinyo.utils.Tools;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.cache.Cache;

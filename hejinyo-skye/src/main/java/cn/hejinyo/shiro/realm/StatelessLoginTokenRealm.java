@@ -1,16 +1,14 @@
 package cn.hejinyo.shiro.realm;
 
 import cn.hejinyo.shiro.token.StatelessLoginToken;
-import cn.hejinyo.system.model.dto.CurrentUserDTO;
-import cn.hejinyo.system.service.SysUserService;
+import cn.hejinyo.model.dto.CurrentUserDTO;
+import cn.hejinyo.service.SysUserService;
 import org.apache.shiro.authc.*;
 import org.apache.shiro.authz.AuthorizationInfo;
 import org.apache.shiro.realm.AuthorizingRealm;
 import org.apache.shiro.subject.PrincipalCollection;
 import org.apache.shiro.util.ByteSource;
 import org.springframework.beans.factory.annotation.Autowired;
-
-import javax.annotation.Resource;
 
 /**
  * @author : HejinYo   hejinyo@gmail.com

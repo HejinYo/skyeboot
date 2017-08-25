@@ -1,5 +1,7 @@
 package cn.hejinyo.utils;
 
+import cn.hejinyo.exception.InfoException;
+
 import javax.validation.ConstraintViolation;
 import javax.validation.Validation;
 import javax.validation.Validator;
@@ -29,7 +31,8 @@ public class ValidatorUtils {
             return "";
         } else {
             ConstraintViolation<Object> constraint = constraintViolations.iterator().next();
-            return constraint.getMessage();
+            throw new InfoException(constraint.getMessage());
+            //return constraint.getMessage();
         }
     }
 
@@ -45,7 +48,8 @@ public class ValidatorUtils {
             return "";
         } else {
             ConstraintViolation<Object> constraint = constraintViolations.iterator().next();
-            return constraint.getMessage();
+            throw new InfoException(constraint.getMessage());
+            //return constraint.getMessage();
         }
     }
 

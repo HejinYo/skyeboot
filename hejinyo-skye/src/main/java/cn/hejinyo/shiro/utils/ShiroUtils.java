@@ -1,6 +1,6 @@
 package cn.hejinyo.shiro.utils;
 
-import cn.hejinyo.system.model.dto.CurrentUserDTO;
+import cn.hejinyo.model.dto.CurrentUserDTO;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.crypto.hash.SimpleHash;
 import org.apache.shiro.subject.Subject;

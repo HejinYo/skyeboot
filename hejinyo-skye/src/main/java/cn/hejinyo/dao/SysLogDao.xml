@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.hejinyo.dao.SysLogDao">
+
+    <resultMap id="BaseLogMap" type="syslog">
+        <id column="id" jdbcType="INTEGER" property="id"/>
+        <result column="user_name" jdbcType="VARCHAR" property="userName"/>
+        <result column="operation" jdbcType="VARCHAR" property="operation"/>
+        <result column="method" jdbcType="VARCHAR" property="method"/>
+        <result column="params" jdbcType="VARCHAR" property="params"/>
+        <result column="ip" jdbcType="VARCHAR" property="ip"/>
+        <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
+    </resultMap>
+
+    <sql id="Base_SysLog_List">
+        id, user_name, operation, method, params, ip, create_time
+    </sql>
+
+    <insert id="save" parameterType="syslog" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO sys_log (id, user_name, operation, method, params, ip, create_time)
+        VALUES (#{id}, #{userName}, #{operation}, #{method}, #{params}, #{ip}, #{createTime})
+    </insert>
+
+    <select id="listPage" resultType="syslog">
+        SELECT *
+        FROM sys_log
+    </select>
+
+</mapper>

@@ -1,9 +1,9 @@
 package cn.hejinyo.shiro.realm;
 
 import cn.hejinyo.shiro.token.StatelessAuthcToken;
-import cn.hejinyo.system.model.dto.CurrentUserDTO;
-import cn.hejinyo.system.service.SysPermissionService;
-import cn.hejinyo.system.service.SysRoleService;
+import cn.hejinyo.model.dto.CurrentUserDTO;
+import cn.hejinyo.service.SysPermissionService;
+import cn.hejinyo.service.SysRoleService;
 import org.apache.shiro.authc.AuthenticationException;
 import org.apache.shiro.authc.AuthenticationInfo;
 import org.apache.shiro.authc.AuthenticationToken;

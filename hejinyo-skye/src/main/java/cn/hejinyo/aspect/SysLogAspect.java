@@ -1,8 +1,9 @@
 package cn.hejinyo.aspect;
 
 import cn.hejinyo.annotation.SysLogger;
-import cn.hejinyo.system.model.SysLog;
-import cn.hejinyo.system.service.SysLogService;
+import cn.hejinyo.model.SysLog;
+import cn.hejinyo.service.SysLogService;
+import cn.hejinyo.shiro.utils.ShiroUtils;
 import cn.hejinyo.utils.JsonUtils;
 import cn.hejinyo.utils.WebUtils;
 import org.apache.catalina.session.StandardSessionFacade;
@@ -61,10 +62,11 @@ public class SysLogAspect {
         //请求的参数
         StringBuilder params = new StringBuilder();
         Object[] parameter = joinPoint.getArgs();
-        for (int i = 1; i < parameter.length; i++) {
+        String[] paramNames = ((MethodSignature) joinPoint.getSignature()).getParameterNames();
+        for (int i = 0; i < parameter.length; i++) {
             if (!(parameter[i] instanceof ServletRequest) && !(parameter[i] instanceof StandardSessionFacade)) {
                 String parm = JsonUtils.toJSONString(parameter[i]);
-                params.append("P").append(i).append(":").append(parm).append(";");
+                params.append(paramNames[i]).append(":").append(parm).append(";");
             }
         }
         sysLog.setParams(params.toString());
@@ -82,11 +84,11 @@ public class SysLogAspect {
         //用户名
         //Optional<String> username = Optional.ofNullable(ShiroUtils.getCurrentUser().getUserName());
         //sysLog.setUserName(username.orElse("outline"));
-        /*if (ShiroUtils.getSubject().isAuthenticated()) {
+        if (ShiroUtils.getSubject().isAuthenticated()) {
             sysLog.setUserName(ShiroUtils.getCurrentUser().getUserName());
         } else {
             sysLog.setUserName("visitor");
-        }*/
+        }
 
         logger.debug("SysLogger={}", "[" + request.getRequestURL().toString() + "]" + JsonUtils.toJSONString(syslog));
         //保存系统日志
