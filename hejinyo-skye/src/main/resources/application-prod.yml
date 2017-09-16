@@ -1,3 +1,32 @@
 server:
-  port: 8080
+  port: 80
   context-path: /
+spring:
+  datasource:
+    name: mysql_druid
+    driver-class-name: com.mysql.jdbc.Driver
+    url: jdbc:mysql://bdm287600448.my3w.com:3306/bdm287600448_db?useUnicode=true&characterEncoding=utf-8
+    username: bdm287600448
+    password: Sy9esttUFGotN3n6Y5rWkyg/LLJNKCSVis4c6/63IHA18yblEObfF13UO84L1yZpD0UBYTPbfW+WcMYTGkGsmw==
+    sql-script-encoding: UTF-8
+    druid:
+      filter.config.enabled: true
+      connection-properties: config.decrypt=true;config.decrypt.key=MFwwDQYJKoZIhvcNAQEBBQADSwAwSAJBAK++MpKUcFIxrxgCPi5jhyYAFfk6g+sHNLAuW4gLal9ABV9Mhucu61t1fW2Owyf3DpqCOYFJLoXioctwQ925/9UCAwEAAQ==
+      initial-size: 1
+      min-idle: 1
+      max-active: 20
+      max-wait: 60000
+      time-between-eviction-runs-millis: 60000
+      min-evictable-idle-time-millis: 300000
+      validation-query: select 'x'
+      test-while-idle: true
+      test-on-borrow: false
+      test-on-return: false
+      pool-prepared-statements: false
+      max-open-prepared-statements: 20
+      stat-view-servlet:
+        enabled: true
+        url-pattern: /druid/*
+        reset-enable: false
+        login-username: admin
+        login-password: 123456

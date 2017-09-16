@@ -1,43 +1,24 @@
 package cn.hejinyo.service.impl;
 
-import cn.hejinyo.annotation.SysLogger;
+import cn.hejinyo.base.BaseServiceImpl;
 import cn.hejinyo.dao.SysUserDao;
 import cn.hejinyo.exception.InfoException;
 import cn.hejinyo.model.SysUser;
 import cn.hejinyo.model.dto.CurrentUserDTO;
 import cn.hejinyo.service.SysUserService;
-import cn.hejinyo.shiro.utils.ShiroUtils;
-import cn.hejinyo.utils.PageQuery;
-import cn.hejinyo.utils.PojoConvertUtil;
+import cn.hejinyo.utils.ShiroUtils;
 import cn.hejinyo.utils.StringUtils;
-import com.alibaba.druid.sql.visitor.functions.Now;
 import org.apache.shiro.crypto.SecureRandomNumberGenerator;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
-import java.util.List;
 
 @Service
-public class SysUserServiceImpl implements SysUserService {
-
-    @Autowired
-    private SysUserDao sysUserDao;
+public class SysUserServiceImpl extends BaseServiceImpl<SysUserDao, SysUser, Integer> implements SysUserService {
 
     @Override
     public CurrentUserDTO getCurrentUser(String userName) {
-        return sysUserDao.getCurrentUser(userName);
-    }
-
-    @Override
-    public SysUser get(int userID) {
-        return sysUserDao.get(userID);
-        //return PojoConvertUtil.convert(sysUser, SysUser.class);
-    }
-
-    @Override
-    public List<SysUser> listPage(PageQuery pageQuery) {
-        return sysUserDao.listPage(pageQuery);
+        return baseDao.getCurrentUser(userName);
     }
 
     @Override
@@ -60,20 +41,22 @@ public class SysUserServiceImpl implements SysUserService {
         //创建时间
         newUser.setCreateTime(new Date());
         //默认状态：正常
-        newUser.setState(0);
-        return sysUserDao.save(newUser);
+        newUser.setState(1);
+        return baseDao.save(newUser);
     }
 
     @Override
-    public int isExistUserName(String userName) {
+    public boolean isExistUserName(String userName) {
         //查询用户名是否存在
-        return sysUserDao.isExistUserName(StringUtils.toLowerCase(userName));
+        SysUser sysUser = new SysUser();
+        sysUser.setUserName(StringUtils.toLowerCase(userName));
+        return baseDao.exsit(sysUser);
     }
 
     @Override
     public int update(SysUser sysUser) {
         //用户原来信息
-        SysUser sysUserOld = sysUserDao.get(sysUser.getUserId());
+        SysUser sysUserOld = baseDao.findOne(sysUser.getUserId());
         if (null == sysUserOld) {
             throw new InfoException("用户不存在");
         }
@@ -95,7 +78,7 @@ public class SysUserServiceImpl implements SysUserService {
         if (StringUtils.isNotNull(userStr)) {
             String userName = StringUtils.toLowerCase(userStr);
             if (!userName.equals(sysUserOld.getUserName())) {
-                if (sysUserDao.isExistUserName(userName) > 0) {
+                if (isExistUserName(userName)) {
                     //新的用户名已经存在
                     throw new InfoException("用户名已经存在");
                 }
@@ -152,23 +135,17 @@ public class SysUserServiceImpl implements SysUserService {
             }
         }
         if (flag) {
-            return sysUserDao.update(newUser);
+            return baseDao.update(newUser);
         }
         return 0;
     }
 
     @Override
-    public int delete(SysUser userVO) {
-        return sysUserDao.delete(userVO.getUserId());
-    }
-
-    @Override
-    @SysLogger("用户登录")
     public int updateUserLoginInfo(CurrentUserDTO userDTO) {
         SysUser sysUser = new SysUser();
         sysUser.setLoginTime(new Date());
         sysUser.setUserId(userDTO.getUserId());
         sysUser.setLoginIp(userDTO.getLoginIp());
-        return sysUserDao.update(sysUser);
+        return baseDao.update(sysUser);
     }
 }

@@ -1,38 +1,58 @@
 package cn.hejinyo.base;
 
+import cn.hejinyo.utils.PageQuery;
+
+import java.io.Serializable;
 import java.util.List;
-import java.util.Map;
 
-public interface BaseDao<T> {
+/**
+ * @author : HejinYo   hejinyo@gmail.com
+ * @date : 2017/8/26 18:28
+ * @Description :
+ */
+public interface BaseDao<T, ID extends Serializable> {
+    /**
+     * 删除给定主键的记录
+     */
+    Integer delete(ID id);
 
-    int save(T t);
+    /**
+     * 删除给定多个实体的主键记录
+     */
+    Integer delete(List<T> entity);
 
-    int save(Map<String, Object> parameter);
+    /**
+     * 根据主键查找一条记录
+     */
+    T findOne(ID id);
 
-    int saveBatch(List<T> list);
+    /**
+     * 返回所有记录
+     */
+    List<T> findAll();
 
-    int delete(Object id);
+    List<T> findList(T entity);
 
-    int delete(Map<String, Object> parameter);
+    List<T> findPage(PageQuery pageQuery);
 
-    int deleteBatch(Object[] id);
+    /**
+     * 实体属性的记录数量
+     */
+    int count(T entity);
 
-    int update(T t);
+    /**
+     * 实体是否存在
+     */
+    boolean exsit(T entity);
 
-    int update(Map<String, Object> parameter);
+    /**
+     * 增加
+     */
+    Integer save(T entity);
 
-    T get(Object id);
-
-    List<T> list(Object id);
-
-    List<T> list(Map<String, Object> parameter);
-
-    List<T> listPage(Object id);
-
-    List<T> listPage(Map<String, Object> parameter);
-
-    int count();
-
-    int count(Map<String, Object> parameter);
+    /**
+     * 更新
+     */
+    Integer update(T entity);
 
 }

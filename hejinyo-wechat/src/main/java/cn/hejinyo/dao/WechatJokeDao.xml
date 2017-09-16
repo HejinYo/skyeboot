@@ -1,26 +1,99 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="cn.hejinyo.dao.WechatJokeDao">
-    <resultMap id="BaseResultMap" type="cn.hejinyo.model.WechatJoke">
-        <id column="id" jdbcType="INTEGER" property="id"/>
-        <result column="title" jdbcType="VARCHAR" property="title"/>
-        <result column="typeid" jdbcType="INTEGER" property="typeid"/>
-        <result column="hits" jdbcType="INTEGER" property="hits"/>
-        <result column="dateandtime" jdbcType="TIMESTAMP" property="dateandtime"/>
-        <result column="content" jdbcType="LONGVARCHAR" property="content"/>
-    </resultMap>
-    <sql id="Base_Column_List">
-        id, title, typeid, hits, dateandtime
-    </sql>
-    <select id="get" parameterType="int" resultMap="BaseResultMap">
-        SELECT
-            id,
-            title,
-            typeid,
-            hits,
-            dateandtime,
-            content
-        FROM wechat_joke
-        WHERE id = #{id}
-    </select>
+  <resultMap id="BaseResultMap" type="cn.hejinyo.model.WechatJoke">
+    <id column="id" jdbcType="INTEGER" property="id" />
+    <result column="title" jdbcType="VARCHAR" property="title" />
+    <result column="typeid" jdbcType="INTEGER" property="typeid" />
+    <result column="hits" jdbcType="INTEGER" property="hits" />
+    <result column="dateandtime" jdbcType="TIMESTAMP" property="dateandtime" />
+  </resultMap>
+  <sql id="Base_Column_List">
+    id, title, typeid, hits, dateandtime, content
+  </sql>
+  <sql id="Base_Where_SQL">
+    <where>
+		<if test="null != title">and title = #{title}</if>
+		<if test="null != typeid">and typeid = #{typeid}</if>
+		<if test="null != hits">and hits = #{hits}</if>
+		<if test="null != dateandtime">and dateandtime = #{dateandtime}</if>
+		<if test="null != content">and content = #{content}</if>
+	</where>
+  </sql>
+  <delete id="delete" parameterType="java.lang.Integer">
+    delete
+		from wechat_joke
+	where
+		id = #{id}
+  </delete>
+  <delete id="deleteArray" parameterType="java.util.List">
+    delete
+		from wechat_joke
+	where
+		id in 
+		<foreach collection="array" index="index" item="item" open="(" separator="," close=")">
+			#{item}
+		</foreach>
+  </delete>
+  <delete id="deleteList" parameterType="java.util.List">
+    delete
+		from wechat_joke
+	where
+		id in 
+		<foreach collection="list" index="index" item="item" open="(" separator="," close=")">
+			#{item.id}
+		</foreach>
+  </delete>
+  <select id="findOne" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+    select
+		<include refid="Base_Column_List" />
+	from wechat_joke
+	where id = #{id}
+  </select>
+  <select id="findAll" resultMap="BaseResultMap">
+    select
+		<include refid="Base_Column_List" />
+	from wechat_joke
+  </select>
+  <select id="findList" parameterType="cn.hejinyo.model.WechatJoke" resultMap="BaseResultMap">
+    select
+		<include refid="Base_Column_List" />
+	from wechat_joke
+		<include refid="Base_Where_SQL" />
+  </select>
+  <select id="count" parameterType="cn.hejinyo.model.WechatJoke" resultType="int">
+    select
+		count(*)
+	from wechat_joke
+		<include refid="Base_Where_SQL" />
+  </select>
+  <insert id="save" keyProperty="id" parameterType="cn.hejinyo.model.WechatJoke" useGeneratedKeys="true">
+    insert into wechat_joke
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="null != title">title, </if>
+			<if test="null != typeid">typeid, </if>
+			<if test="null != hits">hits, </if>
+			<if test="null != dateandtime">dateandtime, </if>
+			<if test="null != content">content, </if>
+		</trim>
+	values
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="null != title">#{title}, </if>
+			<if test="null != typeid">#{typeid}, </if>
+			<if test="null != hits">#{hits}, </if>
+			<if test="null != dateandtime">#{dateandtime}, </if>
+			<if test="null != content">#{content}, </if>
+		</trim>
+  </insert>
+  <update id="update" parameterType="cn.hejinyo.model.WechatJoke">
+    update wechat_joke 
+		<set>
+			<if test="null != title">title = #{title}, </if>
+			<if test="null != typeid">typeid = #{typeid}, </if>
+			<if test="null != hits">hits = #{hits}, </if>
+			<if test="null != dateandtime">dateandtime = #{dateandtime}, </if>
+			<if test="null != content">content = #{content}, </if>
+		</set>
+		where id = #{id}
+  </update>
 </mapper>

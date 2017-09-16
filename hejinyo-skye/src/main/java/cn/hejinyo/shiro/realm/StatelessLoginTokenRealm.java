@@ -35,7 +35,7 @@ public class StatelessLoginTokenRealm extends AuthorizingRealm {
         CurrentUserDTO currentUserDTO = sysUserService.getCurrentUser(username);//根据登录名查询用户信息
         if (null == currentUserDTO || -1 == currentUserDTO.getState()) {// 如果无相关用户或已删除则返回null
             return null;
-        } else if (1 == currentUserDTO.getState()) {//是否锁定
+        } else if (0 == currentUserDTO.getState()) {//是否锁定
             throw new LockedAccountException(); //抛出帐号锁定异常
         }
         //获取用户数据库中密码

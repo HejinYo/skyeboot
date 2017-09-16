@@ -21,4 +21,6 @@ public interface SysLogService {
     void save(SysLog sysLog);
 
     List<SysLog> list();
+
+
 }

@@ -33,8 +33,10 @@ public class SysUser implements Serializable {
     @Pattern(regexp = "^$|^((17[0-9])|(14[0-9])|(13[0-9])|(15[^4,\\D])|(18[0,5-9]))\\d{8}$", message = "手机格式不正确", groups = {RestfulValid.POST.class, RestfulValid.PUT.class})
     private String phone;//手机号
     private String loginIp;//最后登录IP
+    @JSONField(format = "yyyy-MM-dd HH:mm:ss")
     private Date loginTime;//最后登录时间
     private Integer state;//用户状态 0：正常；1：锁定；-1：禁用(删除)
+    @JSONField(format = "yyyy-MM-dd HH:mm:ss")
     private Date createTime; //创建时间
     private Integer createId;//创建人员ID
 }

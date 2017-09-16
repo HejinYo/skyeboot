@@ -1,6 +1,6 @@
 package cn.hejinyo.dao;
 
-import cn.hejinyo.base.BaseDao;
+import cn.hejinyo.annotation.BaseDao;
 import cn.hejinyo.model.SysRole;
 import org.apache.ibatis.annotations.Mapper;
 

@@ -1,5 +1,6 @@
 package cn.hejinyo.model.dto;
 
+import com.alibaba.fastjson.annotation.JSONField;
 import lombok.Data;
 
 import java.io.Serializable;
@@ -17,7 +18,9 @@ public class CurrentUserDTO implements Serializable {
 
     private Integer userId;//用户编号
     private String userName;//用户名称
+    @JSONField(serialize = false)
     private String userPwd;//密码
+    @JSONField(serialize = false)
     private String userSalt;//盐
     private String email;//邮箱
     private String phone;//手机号

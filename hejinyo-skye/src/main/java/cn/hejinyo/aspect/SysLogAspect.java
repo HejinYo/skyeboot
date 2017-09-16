@@ -3,7 +3,7 @@ package cn.hejinyo.aspect;
 import cn.hejinyo.annotation.SysLogger;
 import cn.hejinyo.model.SysLog;
 import cn.hejinyo.service.SysLogService;
-import cn.hejinyo.shiro.utils.ShiroUtils;
+import cn.hejinyo.utils.ShiroUtils;
 import cn.hejinyo.utils.JsonUtils;
 import cn.hejinyo.utils.WebUtils;
 import org.apache.catalina.session.StandardSessionFacade;

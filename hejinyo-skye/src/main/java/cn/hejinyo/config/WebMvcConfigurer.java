@@ -75,21 +75,18 @@ public class WebMvcConfigurer extends WebMvcConfigurerAdapter {
 
     /**
      * 拦截器
-     *
-     * @param registry
      */
-    @Override
+  /*  @Override
     public void addInterceptors(InterceptorRegistry registry) {
         // addPathPatterns 用于添加拦截规则
         // excludePathPatterns 用户排除拦截
-        registry.addInterceptor(authcInterceptor()).addPathPatterns("/**").excludePathPatterns("/login", "/wechat/**");
+        //registry.addInterceptor(authcInterceptor()).addPathPatterns("/**").excludePathPatterns("/login", "/logout", "/error", "/wechat/**");
         super.addInterceptors(registry);
-    }
-
-    @Bean
+    }*/
+    /*@Bean
     public AuthcInterceptor authcInterceptor() {
         return new AuthcInterceptor();
-    }
+    }*/
 
 
 }

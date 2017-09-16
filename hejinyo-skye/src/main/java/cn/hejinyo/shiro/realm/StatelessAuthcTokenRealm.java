@@ -1,9 +1,11 @@
 package cn.hejinyo.shiro.realm;
 
-import cn.hejinyo.shiro.token.StatelessAuthcToken;
 import cn.hejinyo.model.dto.CurrentUserDTO;
 import cn.hejinyo.service.SysPermissionService;
 import cn.hejinyo.service.SysRoleService;
+import cn.hejinyo.shiro.token.StatelessAuthcToken;
+import cn.hejinyo.utils.RedisKeys;
+import cn.hejinyo.utils.RedisUtils;
 import org.apache.shiro.authc.AuthenticationException;
 import org.apache.shiro.authc.AuthenticationInfo;
 import org.apache.shiro.authc.AuthenticationToken;
@@ -12,8 +14,9 @@ import org.apache.shiro.authz.AuthorizationInfo;
 import org.apache.shiro.authz.SimpleAuthorizationInfo;
 import org.apache.shiro.realm.AuthorizingRealm;
 import org.apache.shiro.subject.PrincipalCollection;
+import org.springframework.beans.factory.annotation.Autowired;
 
-import javax.annotation.Resource;
+import java.util.Set;
 
 /**
  * @author : HejinYo   hejinyo@gmail.com
@@ -22,10 +25,12 @@ import javax.annotation.Resource;
  */
 public class StatelessAuthcTokenRealm extends AuthorizingRealm {
 
-    @Resource
+    @Autowired
     private SysRoleService sysRoleService;
-    @Resource
+    @Autowired
     private SysPermissionService sysPermissionService;
+    @Autowired
+    private RedisUtils redisUtils;
 
     @Override
     public boolean supports(AuthenticationToken token) {
@@ -47,16 +52,36 @@ public class StatelessAuthcTokenRealm extends AuthorizingRealm {
      */
     @Override
     protected AuthorizationInfo doGetAuthorizationInfo(PrincipalCollection principals) {
-        CurrentUserDTO CurrentUserDTO = (CurrentUserDTO) principals.getPrimaryPrincipal();
-        int userId = CurrentUserDTO.getUserId();
-        //获取用户权限
+        CurrentUserDTO currentUserDTO = (CurrentUserDTO) principals.getPrimaryPrincipal();
+        int userId = currentUserDTO.getUserId();
+        String username = currentUserDTO.getUserName();
         SimpleAuthorizationInfo authorizationInfo = new SimpleAuthorizationInfo();
         //获得角色信息
-        authorizationInfo.addRoles(sysRoleService.getUserRoleSet(userId));
+        Set roleSet = redisUtils.get(getRoleCacheKey(username), Set.class);
+        if (null != roleSet) {
+            authorizationInfo.addRoles(roleSet);
+        } else {
+            roleSet = sysRoleService.getUserRoleSet(userId);
+            redisUtils.set(getRoleCacheKey(username), roleSet, 1800);
+            authorizationInfo.addRoles(roleSet);
+        }
         //获得权限信息
-        authorizationInfo.addStringPermissions(sysPermissionService.getUserPermisSet(userId));
+        Set permissionsSet = redisUtils.get(getPermissionCacheKey(username), Set.class);
+        if (null != permissionsSet) {
+            authorizationInfo.addStringPermissions(permissionsSet);
+        } else {
+            permissionsSet = sysPermissionService.getUserPermisSet(userId);
+            redisUtils.set(getPermissionCacheKey(username), permissionsSet, 1800);
+            authorizationInfo.addStringPermissions(permissionsSet);
+        }
         return authorizationInfo;
     }
 
+    private String getRoleCacheKey(String name) {
+        return RedisKeys.getShiroCacheKey("authCache" + ":" + name + ":roles");
+    }
 
+    private String getPermissionCacheKey(String name) {
+        return RedisKeys.getShiroCacheKey("authCache" + ":" + name + ":permissions");
+    }
 }

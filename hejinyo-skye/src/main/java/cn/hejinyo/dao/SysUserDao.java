@@ -11,7 +11,7 @@ import org.apache.ibatis.annotations.Mapper;
  * @Description : 用户实体类
  */
 @Mapper
-public interface SysUserDao extends BaseDao<SysUser> {
+public interface SysUserDao extends BaseDao<SysUser, Integer> {
 
     /**
      * 执行登录，查询用户登录信息
@@ -20,13 +20,4 @@ public interface SysUserDao extends BaseDao<SysUser> {
      * @return
      */
     CurrentUserDTO getCurrentUser(String userName);
-
-    /**
-     * 用户名是否存在
-     *
-     * @param userName
-     * @return
-     */
-    int isExistUserName(String userName);
-
 }

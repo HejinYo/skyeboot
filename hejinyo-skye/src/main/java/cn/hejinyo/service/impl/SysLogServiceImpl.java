@@ -1,7 +1,7 @@
 package cn.hejinyo.service.impl;
 
-import cn.hejinyo.model.SysLog;
 import cn.hejinyo.dao.SysLogDao;
+import cn.hejinyo.model.SysLog;
 import cn.hejinyo.service.SysLogService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

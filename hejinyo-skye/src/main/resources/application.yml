@@ -1,43 +1,31 @@
+
+server:
+    tomcat:
+        uri-encoding: UTF-8
+        max-threads: 1000
+        min-spare-threads: 30
+    connection-timeout: 5000
+
 spring:
   profiles:
-    active: dev
-  datasource:
-    name: mysql_druid
-    driver-class-name: com.mysql.jdbc.Driver
-    url: jdbc:mysql://127.0.0.1:3306/yoyo?useUnicode=true&characterEncoding=utf-8
-    username: root
-    password: XroRXpiGU7vJeuQrAnZ8FhA4+BEzU9x45IabHN5yzo8bNhm2VXcUG4XdMf1RxNP5CQmbRr05/S/bsNvOcnSaHA==
-    sql-script-encoding: UTF-8
-    druid:
-      filter.config.enabled: true
-      connection-properties: config.decrypt=true;config.decrypt.key=MFwwDQYJKoZIhvcNAQEBBQADSwAwSAJBALirgbRwt9we2+zKDMwEscyBxd901teyUNDexKpqEOMR943gmUhpBPCvqpZPp04KAxHkt612njXgjwJOAVm0kZECAwEAAQ==
-      initial-size: 1
-      min-idle: 1
-      max-active: 20
-      max-wait: 60000
-      time-between-eviction-runs-millis: 60000
-      min-evictable-idle-time-millis: 300000
-      validation-query: select 'x'
-      test-while-idle: true
-      test-on-borrow: false
-      test-on-return: false
-      pool-prepared-statements: false
-      max-open-prepared-statements: 20
-      web-stat-filter:
-        enabled: true
-        url-pattern: /*
-        exclusions: '*.js,*.gif,*.jpg,*.png,*.css,*.ico,*.woff,*.woff2,/druid/*'
-        profile-enable: true
-      stat-view-servlet:
-        enabled: true
-        url-pattern: /druid/*
-        reset-enable: false
-        login-username: admin
-        login-password: 123456
-      aop-patterns: cn.hejinyo.service.*
-      # Spring监控配置，说明请参考Druid Github Wiki，配置_Druid和Spring关联监控配置
-      #spring.datasource.druid.aop-patterns= # Spring监控AOP切入点，如x.y.z.service.*,配置多个英文逗号分隔
-      # 如果spring.datasource.druid.aop-patterns要代理的类没有定义interface请设置spring.aop.proxy-target-class=true
+    active: prod
+  http:
+    multipart:
+      max-file-size: 100MB
+      max-request-size: 100MB
+      enabled: true
+  redis:
+      database: 0
+      host: hejinyo.cn
+      port: 6379
+      password: redhat     # 密码（默认为空）
+      timeout: 6000  # 连接超时时长（毫秒）
+      pool:
+        max-active: 1000  # 连接池最大连接数（使用负值表示没有限制）
+        max-wait: -1      # 连接池最大阻塞等待时间（使用负值表示没有限制）
+        max-idle: 10      # 连接池中的最大空闲连接
+        min-idle: 5       # 连接池中的最小空闲连接
+
 mybatis:
   type-aliases-package: cn.hejinyo.model
   mapper-locations: classpath*:cn/hejinyo/dao/*Dao.xml
@@ -55,6 +43,3 @@ pagehelper:
     reasonable: true
     params: pageNum=start;pageSize=limit;pageSizeZero=zero;reasonable=heli;count=contsql
     row-bounds-with-count: true
-
-logging:
-  level: debug

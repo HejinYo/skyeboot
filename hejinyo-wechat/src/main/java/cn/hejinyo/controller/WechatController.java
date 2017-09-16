@@ -3,9 +3,10 @@ package cn.hejinyo.controller;
 import cn.hejinyo.model.ReplyMessage;
 import cn.hejinyo.model.TextMessage;
 import cn.hejinyo.service.WechatJokeService;
+import cn.hejinyo.utils.Result;
+import cn.hejinyo.utils.StringUtils;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
@@ -24,10 +25,10 @@ public class WechatController {
     @Autowired
     private WechatJokeService wechatJokeService;
 
-    @RequestMapping(method = {RequestMethod.GET})
+    @RequestMapping(method = {RequestMethod.GET}, produces = "text/html;charset=UTF-8")
     public String joinWechat(@RequestParam String signature, @RequestParam String timestamp, @RequestParam String nonce, @RequestParam String echostr) {
         String requeststr = "signature:" + signature + ";timestamp" + timestamp + ";nonce:" + nonce + ";echostr:" + echostr;
-        System.out.println(requeststr);
+        System.out.println("微信验证参数：" + requeststr);
         //字典序排序
         ArrayList<String> list = new ArrayList<String>();
         list.add(nonce);
@@ -37,10 +38,10 @@ public class WechatController {
 
         String localsignature = DigestUtils.sha1Hex(list.get(0) + list.get(1) + list.get(2));
         if (signature.equals(localsignature)) {
-            System.out.println(localsignature);
+            System.out.println("微信认证通过：" + localsignature);
             return echostr;
         }
-        return "";
+        return echostr;
     }
 
     @RequestMapping(method = {RequestMethod.POST}, produces = "application/xml;charset=UTF-8")
@@ -53,8 +54,8 @@ public class WechatController {
         replyMessage.setMsgType(message.getMsgType());
         String conten = "";
         String mess = message.getContent();
-        if (mess.indexOf("天气 ") == 0) {
-            String citys = message.getContent().substring(3);
+        if (mess.contains("天气")) {
+            String citys = mess.replace("天气", "").replace(" ", "");
             if (StringUtils.isEmpty(citys.trim())) {
                 citys = "北京";
             }
@@ -69,9 +70,10 @@ public class WechatController {
         System.out.println(replyMessage);
         return replyMessage.toString();
     }
-    @RequestMapping("/joke")
-    public String joke() {
-        return wechatJokeService.getRandomWechatJoke().getContent();
+
+    @RequestMapping("/findOne")
+    public Result joke() {
+        return Result.ok(wechatJokeService.findOne(1));
     }
 
 }

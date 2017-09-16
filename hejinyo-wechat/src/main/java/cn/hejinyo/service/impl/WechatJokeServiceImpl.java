@@ -1,5 +1,6 @@
 package cn.hejinyo.service.impl;
 
+import cn.hejinyo.base.BaseServiceImpl;
 import cn.hejinyo.dao.WechatJokeDao;
 import cn.hejinyo.model.WechatJoke;
 import cn.hejinyo.service.WechatJokeService;
@@ -19,7 +20,7 @@ import java.util.Random;
  * @Description :
  */
 @Service
-public class WechatJokeServiceImpl implements WechatJokeService {
+public class WechatJokeServiceImpl extends BaseServiceImpl<WechatJokeDao, WechatJoke, Integer> implements WechatJokeService {
 
     @Autowired
     private WechatJokeDao wechatJokeDao;
@@ -28,9 +29,9 @@ public class WechatJokeServiceImpl implements WechatJokeService {
     public WechatJoke getRandomWechatJoke() {
         Random rand = new Random();
         int randNum = 9000;
-        WechatJoke wechatJoke = wechatJokeDao.get(rand.nextInt(randNum));
+        WechatJoke wechatJoke = baseDao.findOne(rand.nextInt(randNum));
         while (null == wechatJoke) {
-            wechatJoke = wechatJokeDao.get(rand.nextInt(randNum));
+            wechatJoke = wechatJokeDao.findOne(rand.nextInt(randNum));
         }
         return wechatJoke;
     }

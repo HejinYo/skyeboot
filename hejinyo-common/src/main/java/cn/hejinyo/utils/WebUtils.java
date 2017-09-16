@@ -69,7 +69,6 @@ public class WebUtils extends org.springframework.web.util.WebUtils {
         //				ip = ip.substring(0, ip.indexOf(","));
         //			}
         //		}
-
         return ip;
     }
 

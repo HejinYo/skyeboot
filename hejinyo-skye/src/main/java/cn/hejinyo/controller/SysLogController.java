@@ -1,12 +1,10 @@
 package cn.hejinyo.controller;
 
-import cn.hejinyo.annotation.SysLogger;
 import cn.hejinyo.model.SysLog;
 import cn.hejinyo.service.SysLogService;
 import cn.hejinyo.utils.Result;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
-import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -29,9 +27,7 @@ public class SysLogController {
     @Autowired
     private SysLogService sysLogService;
 
-    @SysLogger("获得日志列表")
     @GetMapping(value = "/syslog")
-    @RequiresPermissions("user:create")
     public Result get() {
         PageHelper.startPage(1, 10);
         Map<String, Object> map = new HashMap<>();

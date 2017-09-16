@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.hejinyo.dao.SysUserDao">
+  <resultMap id="BaseResultMap" type="cn.hejinyo.model.SysUser">
+    <id column="user_id" jdbcType="INTEGER" property="userId" />
+    <result column="user_name" jdbcType="VARCHAR" property="userName" />
+    <result column="user_pwd" jdbcType="VARCHAR" property="userPwd" />
+    <result column="user_salt" jdbcType="VARCHAR" property="userSalt" />
+    <result column="email" jdbcType="VARCHAR" property="email" />
+    <result column="phone" jdbcType="VARCHAR" property="phone" />
+    <result column="login_ip" jdbcType="VARCHAR" property="loginIp" />
+    <result column="login_time" jdbcType="TIMESTAMP" property="loginTime" />
+    <result column="state" jdbcType="INTEGER" property="state" />
+    <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
+    <result column="create_id" jdbcType="INTEGER" property="createId" />
+  </resultMap>
+  <sql id="Base_Column_List">
+    user_id, user_name, user_pwd, user_salt, email, phone, login_ip, login_time, state, create_time, create_id
+  </sql>
+  <sql id="Base_Where_SQL">
+    <where>
+		<if test="null != userName">and user_name = #{userName}</if>
+		<if test="null != userPwd">and user_pwd = #{userPwd}</if>
+		<if test="null != userSalt">and user_salt = #{userSalt}</if>
+		<if test="null != email">and email = #{email}</if>
+		<if test="null != phone">and phone = #{phone}</if>
+		<if test="null != loginIp">and login_ip = #{loginIp}</if>
+		<if test="null != loginTime">and login_time = #{loginTime}</if>
+		<if test="null != state">and state = #{state}</if>
+		<if test="null != createTime">and create_time = #{createTime}</if>
+		<if test="null != createId">and create_id = #{createId}</if>
+	</where>
+  </sql>
+  <delete id="delete" parameterType="java.lang.Integer">
+    delete
+		from sys_user
+	where
+		user_id = #{userId}
+  </delete>
+  <delete id="deleteArray" parameterType="java.util.List">
+    delete
+		from sys_user
+	where
+		user_id in 
+		<foreach collection="array" index="index" item="item" open="(" separator="," close=")">
+			#{item}
+		</foreach>
+  </delete>
+  <delete id="deleteList" parameterType="java.util.List">
+    delete
+		from sys_user
+	where
+		user_id in 
+		<foreach collection="list" index="index" item="item" open="(" separator="," close=")">
+			#{item.userId}
+		</foreach>
+  </delete>
+  <select id="findOne" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+    select
+		<include refid="Base_Column_List" />
+	from sys_user
+	where user_id = #{userId}
+  </select>
+  <select id="findAll" resultMap="BaseResultMap">
+    select
+		<include refid="Base_Column_List" />
+	from sys_user
+  </select>
+  <select id="findList" parameterType="cn.hejinyo.model.SysUser" resultMap="BaseResultMap">
+    select
+		<include refid="Base_Column_List" />
+	from sys_user
+		<include refid="Base_Where_SQL" />
+  </select>
+  <select id="findPage" parameterType="cn.hejinyo.utils.PageQuery" resultMap="BaseResultMap">
+    select
+		<include refid="Base_Column_List" />
+	from sys_user
+		<where>
+		<if test="null != userName">and user_name like concat('%',#{userName},'%')</if>
+		<if test="null != userPwd">and user_pwd like concat('%',#{userPwd},'%')</if>
+		<if test="null != userSalt">and user_salt like concat('%',#{userSalt},'%')</if>
+		<if test="null != email">and email like concat('%',#{email},'%')</if>
+		<if test="null != phone">and phone like concat('%',#{phone},'%')</if>
+		<if test="null != loginIp">and login_ip like concat('%',#{loginIp},'%')</if>
+		<if test="null != loginTime">and login_time like concat('%',#{loginTime},'%')</if>
+		<if test="null != state">and state like concat('%',#{state},'%')</if>
+		<if test="null != createTime">and create_time like concat('%',#{createTime},'%')</if>
+		<if test="null != createId">and create_id like concat('%',#{createId},'%')</if>
+	</where>
+  </select>
+  <select id="count" parameterType="java.lang.Integer">
+    select
+		count(*)
+	from sys_user
+		<include refid="Base_Where_SQL" />
+  </select>
+  <select id="exsit" parameterType="java.lang.Integer">
+    select
+		count(*)
+	from sys_user
+		<include refid="Base_Where_SQL" />
+  </select>
+  <insert id="save" keyProperty="userId" parameterType="cn.hejinyo.model.SysUser" useGeneratedKeys="true">
+    insert into sys_user
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="null != userName">user_name, </if>
+			<if test="null != userPwd">user_pwd, </if>
+			<if test="null != userSalt">user_salt, </if>
+			<if test="null != email">email, </if>
+			<if test="null != phone">phone, </if>
+			<if test="null != loginIp">login_ip, </if>
+			<if test="null != loginTime">login_time, </if>
+			<if test="null != state">state, </if>
+			<if test="null != createTime">create_time, </if>
+			<if test="null != createId">create_id, </if>
+		</trim>
+	values
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="null != userName">#{userName}, </if>
+			<if test="null != userPwd">#{userPwd}, </if>
+			<if test="null != userSalt">#{userSalt}, </if>
+			<if test="null != email">#{email}, </if>
+			<if test="null != phone">#{phone}, </if>
+			<if test="null != loginIp">#{loginIp}, </if>
+			<if test="null != loginTime">#{loginTime}, </if>
+			<if test="null != state">#{state}, </if>
+			<if test="null != createTime">#{createTime}, </if>
+			<if test="null != createId">#{createId}, </if>
+		</trim>
+  </insert>
+  <update id="update" parameterType="cn.hejinyo.model.SysUser">
+    update sys_user 
+		<set>
+			<if test="null != userName">user_name = #{userName}, </if>
+			<if test="null != userPwd">user_pwd = #{userPwd}, </if>
+			<if test="null != userSalt">user_salt = #{userSalt}, </if>
+			<if test="null != email">email = #{email}, </if>
+			<if test="null != phone">phone = #{phone}, </if>
+			<if test="null != loginIp">login_ip = #{loginIp}, </if>
+			<if test="null != loginTime">login_time = #{loginTime}, </if>
+			<if test="null != state">state = #{state}, </if>
+			<if test="null != createTime">create_time = #{createTime}, </if>
+			<if test="null != createId">create_id = #{createId}, </if>
+		</set>
+		where user_id = #{userId}
+  </update>
+</mapper>

@@ -58,9 +58,10 @@ public class Tools {
      * @throws IOException
      */
     public static String[] encryptDBPassword(String password) {
-        String path = "D:/java/jdk/";
+        String path = "C:/java/tools/JDK/";
         String druid = "druid-1.0.16.jar com.alibaba.druid.filter.config.ConfigTools ";
         String fileInfo = "java -cp " + path + druid + password + " ;exit;";
+        System.out.println(fileInfo);
         String pw[] = new String[3];
         try {
             Process proc = Runtime.getRuntime().exec(fileInfo);
@@ -171,6 +172,9 @@ public class Tools {
 
     /**************************** 测试 *********************************/
     public static void main(String agrs[]) {
-
+        String[] str = encryptDBPassword("hj269957961");
+        for (String s : str) {
+            System.out.println(s);
+        }
     }
 }

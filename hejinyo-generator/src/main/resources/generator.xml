@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE generatorConfiguration PUBLIC "-//mybatis.org//DTD MyBatis Generator Configuration 1.0//EN" "http://mybatis.org/dtd/mybatis-generator-config_1_0.dtd">
+<generatorConfiguration>
+    <!-- 数据库驱动包位置 -->
+    <context id="hejinyo_mybatis_generator" targetRuntime="MyBatis3" defaultModelType="flat">
+        <!-- beginningDelimiter和endingDelimiter：指明数据库的用于标记数据库对象名的符号，比如ORACLE就是双引号，MYSQL默认是`反引号； -->
+        <property name="beginningDelimiter" value="`"/>
+        <property name="endingDelimiter" value="`"/>
+        <!-- 生成的文件编码 -->
+        <property name="javaFileEncoding" value="utf-8"/>
+
+        <!-- 通过自定义插件类生成自定义注解和接口 -->
+        <plugin type="cn.hejinyo.GenPlugin"/>
+        <!--  <plugin type="com.xe.demo.common.generator.GenPlugin">
+              <property name="mappers" value="com.xe.demo.mapper.BaseMapper"/>
+          </plugin>-->
+
+
+        <commentGenerator>
+            <!-- 取消生成注释 -->
+            <property name="suppressAllComments" value="true"/>
+        </commentGenerator>
+
+        <!-- 数据库链接URL、用户名、密码 -->
+        <jdbcConnection driverClass="com.mysql.jdbc.Driver" connectionURL="jdbc:mysql://localhost:3306/yoyo?characterEncoding=utf8" userId="root" password="redhat">
+        </jdbcConnection>
+
+        <!-- java类型处理器,用于处理DB中的类型到Java中的类型，默认使用JavaTypeResolverDefaultImpl；
+                注意一点，默认会先尝试使用Integer，Long，Short等来对应DECIMAL和 NUMERIC数据类型；-->
+        <javaTypeResolver>
+            <!-- true：使用BigDecimal对应DECIMAL和 NUMERIC数据类型
+                 false：默认,
+                  scale>0;length>18：使用BigDecimal;
+                  scale=0;length[10,18]：使用Long；
+                  scale=0;length[5,9]：使用Integer；
+                  scale=0;length<5：使用Short； -->
+            <property name="forceBigDecimals" value="false"/>
+        </javaTypeResolver>
+
+        <!-- 生成实体类 -->
+        <javaModelGenerator targetPackage="cn.hejinyo.model" targetProject="hejinyo-generator/src/main/java">
+            <property name="enableSubPackages" value="true"/>
+            <!-- 设置是否在getter方法中，对String类型字段调用trim()方法 -->
+            <property name="trimStrings" value="false"/>
+            <!--<property name="rootClass" value="cn.hejinyo.base.BaseModel"/>-->
+        </javaModelGenerator>
+
+        <!-- 生成Dao接口 -->
+        <sqlMapGenerator targetPackage="cn.hejinyo.dao" targetProject="hejinyo-generator/src/main/java">
+            <property name="enableSubPackages" value="true"/>
+        </sqlMapGenerator>
+
+        <!-- 生成DAO映射文件 -->
+        <javaClientGenerator type="XMLMAPPER" targetPackage="cn.hejinyo.dao" targetProject="hejinyo-generator/src/main/java">
+            <property name="enableSubPackages" value="true"/>
+        </javaClientGenerator>
+
+        <!-- 要生成那些表(更改tableName和domainObjectName就可以) -->
+        <table tableName="sys_user" domainObjectName="SysUser"
+               mapperName="SysUserDao"
+               enableInsert="false"
+               enableSelectByPrimaryKey="true"
+               enableDeleteByPrimaryKey="false"
+               enableUpdateByPrimaryKey="false"
+               enableCountByExample="false"
+               enableUpdateByExample="false"
+               enableDeleteByExample="false"
+               enableSelectByExample="false"
+               selectByExampleQueryId="false"/>
+    </context>
+</generatorConfiguration>

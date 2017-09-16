@@ -1,12 +1,13 @@
 package cn.hejinyo.service;
 
+import cn.hejinyo.base.BaseService;
 import cn.hejinyo.model.SysUser;
 import cn.hejinyo.model.dto.CurrentUserDTO;
 import cn.hejinyo.utils.PageQuery;
 
 import java.util.List;
 
-public interface SysUserService {
+public interface SysUserService extends BaseService<SysUser, Integer> {
 
     /**
      * 执行登录，查询用户登录信息
@@ -17,50 +18,12 @@ public interface SysUserService {
     CurrentUserDTO getCurrentUser(String userName);
 
     /**
-     * 获得用户编号对应的用户信息
-     *
-     * @param userID
-     * @return
-     */
-    SysUser get(int userID);
-
-    /**
-     * 分页查询用户
-     *
-     * @return
-     */
-    List<SysUser> listPage(PageQuery pageQuery);
-
-    /**
-     * 增加用户
-     *
-     * @param userVO
-     */
-    int save(SysUser userVO);
-
-    /**
      * 用户名是否存在
      *
      * @param userName
      * @return
      */
-    int isExistUserName(String userName);
-
-    /**
-     * 修改用户
-     *
-     * @param userVO
-     * @return
-     */
-    int update(SysUser userVO);
-
-    /**
-     * 删除用户
-     *
-     * @param userVO
-     * @return
-     */
-    int delete(SysUser userVO);
+    boolean isExistUserName(String userName);
 
     /**
      * 更新用户登录信息

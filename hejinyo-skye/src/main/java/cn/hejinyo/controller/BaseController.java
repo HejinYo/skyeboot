@@ -1,6 +1,6 @@
 package cn.hejinyo.controller;
 
-import cn.hejinyo.shiro.utils.ShiroUtils;
+import cn.hejinyo.utils.ShiroUtils;
 import cn.hejinyo.model.dto.CurrentUserDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

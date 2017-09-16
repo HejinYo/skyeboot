@@ -11,6 +11,7 @@ include 'services:webservice'
 
 rootProject.name = 'skeyboot'
 include 'hejinyo-common'
-include 'hejinyo-skye'
 include 'hejinyo-wechat'
+include 'hejinyo-skye'
+include 'hejinyo-generator'
 
