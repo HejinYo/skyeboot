@@ -6,6 +6,8 @@ import cn.hejinyo.service.SysRoleService;
 import cn.hejinyo.shiro.token.StatelessAuthcToken;
 import cn.hejinyo.utils.RedisKeys;
 import cn.hejinyo.utils.RedisUtils;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import org.apache.shiro.authc.AuthenticationException;
 import org.apache.shiro.authc.AuthenticationInfo;
 import org.apache.shiro.authc.AuthenticationToken;
@@ -16,6 +18,8 @@ import org.apache.shiro.realm.AuthorizingRealm;
 import org.apache.shiro.subject.PrincipalCollection;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -31,6 +35,8 @@ public class StatelessAuthcTokenRealm extends AuthorizingRealm {
     private SysPermissionService sysPermissionService;
     @Autowired
     private RedisUtils redisUtils;
+
+    private final static Gson gson = new Gson();
 
     @Override
     public boolean supports(AuthenticationToken token) {
@@ -57,31 +63,26 @@ public class StatelessAuthcTokenRealm extends AuthorizingRealm {
         String username = currentUserDTO.getUserName();
         SimpleAuthorizationInfo authorizationInfo = new SimpleAuthorizationInfo();
         //获得角色信息
-        Set roleSet = redisUtils.get(getRoleCacheKey(username), Set.class);
-        if (null != roleSet) {
-            authorizationInfo.addRoles(roleSet);
+        String json = redisUtils.get(RedisKeys.getAuthCacheKey(username));
+        Set<String> roleSet;
+        Set<String> permissionsSet;
+        Map<String, Set<String>> list;
+        if (null != json) {
+            list = gson.fromJson(json, new TypeToken<Map<String, Set<String>>>() {
+            }.getType());
+            roleSet = list.get("role");
+            permissionsSet = list.get("permissions");
         } else {
             roleSet = sysRoleService.getUserRoleSet(userId);
-            redisUtils.set(getRoleCacheKey(username), roleSet, 1800);
-            authorizationInfo.addRoles(roleSet);
-        }
-        //获得权限信息
-        Set permissionsSet = redisUtils.get(getPermissionCacheKey(username), Set.class);
-        if (null != permissionsSet) {
-            authorizationInfo.addStringPermissions(permissionsSet);
-        } else {
+            //获得权限信息
             permissionsSet = sysPermissionService.getUserPermisSet(userId);
-            redisUtils.set(getPermissionCacheKey(username), permissionsSet, 1800);
-            authorizationInfo.addStringPermissions(permissionsSet);
+            list = new HashMap<>();
+            list.put("role", roleSet);
+            list.put("permissions", permissionsSet);
+            redisUtils.set(RedisKeys.getAuthCacheKey(username), list, 600);
         }
+        authorizationInfo.addRoles(roleSet);
+        authorizationInfo.addStringPermissions(permissionsSet);
         return authorizationInfo;
-    }
-
-    private String getRoleCacheKey(String name) {
-        return RedisKeys.getShiroCacheKey("authCache" + ":" + name + ":roles");
-    }
-
-    private String getPermissionCacheKey(String name) {
-        return RedisKeys.getShiroCacheKey("authCache" + ":" + name + ":permissions");
     }
 }

@@ -3,13 +3,8 @@ package cn.hejinyo.shiro.filter;
 import cn.hejinyo.consts.StatusCode;
 import cn.hejinyo.consts.UserToken;
 import cn.hejinyo.model.dto.CurrentUserDTO;
-import cn.hejinyo.service.SysUserService;
 import cn.hejinyo.shiro.token.StatelessAuthcToken;
-import cn.hejinyo.utils.RedisUtils;
-import cn.hejinyo.utils.RedisKeys;
-import cn.hejinyo.utils.ResponseUtils;
-import cn.hejinyo.utils.Result;
-import cn.hejinyo.utils.Tools;
+import cn.hejinyo.utils.*;
 import org.apache.shiro.web.filter.AccessControlFilter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,13 +22,10 @@ import javax.servlet.http.HttpServletRequest;
 public class StatelessAuthcFilter extends AccessControlFilter {
     private static final Logger logger = LoggerFactory.getLogger(StatelessAuthcFilter.class);
 
-    private static final String DEFAULT_TOKEN_CACHENAME = "tokenCache";
     private static final String DEFAULT_AUTHOR_PARAM = "Authorization";
 
     @Autowired
     private RedisUtils redisUtils;
-    @Autowired
-    private SysUserService sysUserService;
 
     @Override
     protected boolean isAccessAllowed(ServletRequest request, ServletResponse response, Object mappedValue) throws Exception {
@@ -48,7 +40,7 @@ public class StatelessAuthcFilter extends AccessControlFilter {
             //解析token
             String username = Tools.getTokenInfo(userToken, UserToken.USERNAME.getValue());
             //缓存中是否有此用户
-            CurrentUserDTO userDTO = redisUtils.get(RedisKeys.getShiroCacheKey(DEFAULT_TOKEN_CACHENAME + ":" + username), CurrentUserDTO.class, 1800);
+            CurrentUserDTO userDTO = redisUtils.get(RedisKeys.getTokenCacheKey(username), CurrentUserDTO.class, 1800);
             if (null != userDTO) {
                 //验证Token有效性
                 Tools.verifyToken(userToken, userDTO.getUserPwd());

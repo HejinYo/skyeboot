@@ -1,6 +1,6 @@
 package cn.hejinyo.config;
 
-import cn.hejinyo.shiro.cache.RedisCacheManager;
+import cn.hejinyo.shiro.filter.LogoutFilter;
 import cn.hejinyo.shiro.filter.StatelessAuthcFilter;
 import cn.hejinyo.shiro.filter.URLFilter;
 import cn.hejinyo.shiro.realm.CredentialsMatcher;
@@ -8,11 +8,9 @@ import cn.hejinyo.shiro.realm.ModularRealm;
 import cn.hejinyo.shiro.realm.StatelessAuthcTokenRealm;
 import cn.hejinyo.shiro.realm.StatelessLoginTokenRealm;
 import cn.hejinyo.shiro.subject.StatelessSubjectFactory;
-import org.apache.shiro.cache.ehcache.EhCacheManager;
 import org.apache.shiro.mgt.DefaultSessionStorageEvaluator;
 import org.apache.shiro.mgt.DefaultSubjectDAO;
 import org.apache.shiro.mgt.SecurityManager;
-import org.apache.shiro.mgt.SubjectFactory;
 import org.apache.shiro.realm.Realm;
 import org.apache.shiro.spring.LifecycleBeanPostProcessor;
 import org.apache.shiro.spring.security.interceptor.AuthorizationAttributeSourceAdvisor;
@@ -90,16 +88,20 @@ public class ShiroConfiguration {
         // 注入自定义拦截器,注意拦截器自注入问题
         Map<String, Filter> filters = new HashMap<>();
         filters.put("url", new URLFilter());
+        filters.put("logout", logoutFilter());
         filters.put("authc", authcFilter());
         factoryBean.setFilters(filters);
 
         // 拦截器链
         Map<String, String> filterMap = new LinkedHashMap<>();
+
+        filterMap.put("/", "anon");
         filterMap.put("/login/**", "anon");
-        filterMap.put("/logout", "anon");
         filterMap.put("/druid/**", "anon");
         filterMap.put("/wechat/**", "anon");
         filterMap.put("/favicon.ico", "anon");
+        
+        filterMap.put("/logout", "logout");
         filterMap.put("/**", "url,authc");
         factoryBean.setFilterChainDefinitionMap(filterMap);
 
@@ -187,8 +189,23 @@ public class ShiroConfiguration {
      * @return
      */
     @Bean
-    public FilterRegistrationBean registrationBean(StatelessAuthcFilter authcFilter) {
+    public FilterRegistrationBean registrationAuthcFilterBean(StatelessAuthcFilter authcFilter) {
         FilterRegistrationBean registration = new FilterRegistrationBean(authcFilter);
+        registration.setEnabled(false);//取消自动注册功能 Filter自动注册,不会添加到FilterChain中.
+        return registration;
+    }
+
+    @Bean
+    public LogoutFilter logoutFilter() {
+        return new LogoutFilter();
+    }
+
+    /**
+     * 解决自定义拦截器混乱问题
+     */
+    @Bean
+    public FilterRegistrationBean registrationLogoutFilterBean(LogoutFilter logoutFilter) {
+        FilterRegistrationBean registration = new FilterRegistrationBean(logoutFilter);
         registration.setEnabled(false);//取消自动注册功能 Filter自动注册,不会添加到FilterChain中.
         return registration;
     }

@@ -6,9 +6,8 @@ import java.io.Serializable;
 import java.util.List;
 
 /**
- * @author : HejinYo   hejinyo@gmail.com
- * @date : 2017/8/31 23:27
- * @Description :
+ * @author : HejinYo   hejinyo@gmail.com  2017/8/31 23:27
+ * @apiNote  :
  */
 public class PageInfo<T> implements Serializable {
     private static final long serialVersionUID = 1L;
@@ -41,6 +40,8 @@ public class PageInfo<T> implements Serializable {
      *
      * @param list page结果
      */
+
+    @SuppressWarnings("unchecked")
     public PageInfo(List<T> list) {
         if (list instanceof Page) {
             Page page = (Page) list;

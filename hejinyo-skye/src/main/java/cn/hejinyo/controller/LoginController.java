@@ -1,15 +1,11 @@
 package cn.hejinyo.controller;
 
 import cn.hejinyo.cloudstorage.CloudStorageConfig;
-import cn.hejinyo.service.SysUserService;
-import cn.hejinyo.shiro.token.StatelessLoginToken;
 import cn.hejinyo.consts.StatusCode;
 import cn.hejinyo.model.dto.CurrentUserDTO;
-import cn.hejinyo.utils.RedisUtils;
-import cn.hejinyo.utils.RedisKeys;
-import cn.hejinyo.utils.Result;
-import cn.hejinyo.utils.Tools;
-import cn.hejinyo.utils.WebUtils;
+import cn.hejinyo.service.SysUserService;
+import cn.hejinyo.shiro.token.StatelessLoginToken;
+import cn.hejinyo.utils.*;
 import com.qiniu.util.Auth;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authc.ExcessiveAttemptsException;
@@ -26,8 +22,6 @@ import javax.servlet.http.HttpServletRequest;
 @RestController
 @RequestMapping("/")
 public class LoginController extends BaseController {
-    private static final String DEFAULT_TOKEN_CACHENAME = "tokenCache";
-
     @Autowired
     private RedisUtils redisUtils;
     @Autowired
@@ -48,9 +42,10 @@ public class LoginController extends BaseController {
             String token = Tools.createToken(12, userDTO.getUserId(), userDTO.getUserName(), userDTO.getUserPwd());
             userDTO.setUserToken(token);
             userDTO.setLoginIp(WebUtils.getIpAddr(request));
-            redisUtils.set(RedisKeys.getShiroCacheKey(DEFAULT_TOKEN_CACHENAME + ":" + userDTO.getUserName()), userDTO, 1800);
-            redisUtils.delete(getRoleCacheKey(userDTO.getUserName()));
-            redisUtils.delete(getPermissionCacheKey(userDTO.getUserName()));
+            //token写入缓存
+            redisUtils.set(RedisKeys.getTokenCacheKey(userDTO.getUserName()), userDTO, 1800);
+            //清除授权缓存
+            redisUtils.delete(RedisKeys.getAuthCacheKey(userDTO.getUserName()));
             sysUserService.updateUserLoginInfo(userDTO);
             return Result.ok(StatusCode.SUCCESS, userDTO);
         } catch (Exception e) {
@@ -77,11 +72,10 @@ public class LoginController extends BaseController {
      *
      * @return
      */
-    @RequestMapping(value = "/logout", method = {RequestMethod.GET})
+    @GetMapping(value = "/logout")
     public Result logout() {
         return Result.ok();
     }
-
 
     /**
      * 文件上传
@@ -94,13 +88,5 @@ public class LoginController extends BaseController {
         config.setQiniuBucketName("skye-user-avatar");
         String token = Auth.create(config.getQiniuAccessKey(), config.getQiniuSecretKey()).uploadToken(config.getQiniuBucketName());
         return Result.ok("获取成功", token);
-    }
-
-    private String getRoleCacheKey(String name) {
-        return RedisKeys.getShiroCacheKey("authCache" + ":" + name + ":roles");
-    }
-
-    private String getPermissionCacheKey(String name) {
-        return RedisKeys.getShiroCacheKey("authCache" + ":" + name + ":permissions");
     }
 }
