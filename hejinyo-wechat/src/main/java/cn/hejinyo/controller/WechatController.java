@@ -73,7 +73,7 @@ public class WechatController {
 
     @RequestMapping("/findOne")
     public Result joke() {
-        return Result.ok(wechatJokeService.findOne(1));
+        return Result.ok(wechatJokeService.getRandomWechatJoke());
     }
 
 }

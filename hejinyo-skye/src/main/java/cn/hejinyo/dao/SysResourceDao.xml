@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="cn.hejinyo.dao.SysResourceDao">
-
-    <resultMap id="BaseResourceMap" type="sysresource">
+    <resultMap id="BaseResultMap" type="cn.hejinyo.model.SysResource">
         <id column="res_id" jdbcType="INTEGER" property="resId"/>
         <result column="res_type" jdbcType="VARCHAR" property="resType"/>
         <result column="res_code" jdbcType="VARCHAR" property="resCode"/>
         <result column="res_name" jdbcType="VARCHAR" property="resName"/>
         <result column="res_pid" jdbcType="INTEGER" property="resPid"/>
+        <result column="res_pname" jdbcType="VARCHAR" property="resPname"/>
         <result column="res_level" jdbcType="INTEGER" property="resLevel"/>
         <result column="res_icon" jdbcType="VARCHAR" property="resIcon"/>
         <result column="seq" jdbcType="INTEGER" property="seq"/>
@@ -16,8 +16,27 @@
         <result column="create_id" jdbcType="INTEGER" property="createId"/>
     </resultMap>
 
-    <resultMap id="BaseUserMenuMap" type="usermenudto">
+
+    <resultMap id="ResourceTreeMap" type="cn.hejinyo.model.dto.ResourceTreeDTO">
+        <id column="res_id" jdbcType="INTEGER" property="resId"/>
+        <result column="res_type" jdbcType="VARCHAR" property="resType"/>
+        <result column="res_code" jdbcType="VARCHAR" property="resCode"/>
+        <result column="res_name" jdbcType="VARCHAR" property="resName"/>
+        <result column="res_pid" jdbcType="INTEGER" property="resPid"/>
+        <result column="res_pname" jdbcType="VARCHAR" property="resPname"/>
+        <result column="res_level" jdbcType="INTEGER" property="resLevel"/>
+        <result column="res_icon" jdbcType="VARCHAR" property="resIcon"/>
+        <result column="seq" jdbcType="INTEGER" property="seq"/>
+        <result column="state" jdbcType="INTEGER" property="state"/>
+        <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
+        <result column="create_id" jdbcType="INTEGER" property="createId"/>
+        <collection property="childrenRes" column="res_id" ofType="cn.hejinyo.model.dto.ResourceTreeDTO" javaType="java.util.ArrayList" select="selectChildrenRes"/>
+    </resultMap>
+
+    <!-- 递归查询用户菜单 -->
+    <resultMap id="BaseUserMenuMap" type="cn.hejinyo.model.dto.UserMenuDTO">
         <id column="res_id" jdbcType="INTEGER" property="mid"/>
+        <result column="role_id" jdbcType="INTEGER" property="roleId"/>
         <result column="res_code" jdbcType="VARCHAR" property="redCode"/>
         <result column="res_name" jdbcType="VARCHAR" property="mname"/>
         <result column="res_pid" jdbcType="INTEGER" property="pid"/>
@@ -25,41 +44,89 @@
         <result column="res_icon" jdbcType="VARCHAR" property="micon"/>
         <result column="seq" jdbcType="INTEGER" property="seq"/>
         <result column="perm_url" jdbcType="INTEGER" property="murl"/>
-        <collection property="childrenMenu" column="res_id" ofType="usermenudto" javaType="java.util.ArrayList" select="selectChildren"></collection>
+        <collection property="childrenMenu" column="{resId=res_id,roleId=role_id}"  ofType="cn.hejinyo.model.dto.UserMenuDTO" javaType="java.util.ArrayList" select="selectChildren"/>
     </resultMap>
 
-
-    <sql id="Base_Resource_List">
+    <sql id="Base_Column_List">
         res_id, res_type, res_code, res_name, res_pid, res_level, res_icon, seq, state, create_time, create_id
     </sql>
 
-    <select id="selectChildren" resultMap="BaseUserMenuMap" parameterType="int">
+    <sql id="Base_Where_SQL">
+        <where>
+            <if test="null != resType">and res_type = #{resType}</if>
+            <if test="null != resCode">and res_code = #{resCode}</if>
+            <if test="null != resName">and res_name = #{resName}</if>
+            <if test="null != resPid">and res_pid = #{resPid}</if>
+            <if test="null != resLevel">and res_level = #{resLevel}</if>
+            <if test="null != resIcon">and res_icon = #{resIcon}</if>
+            <if test="null != seq">and seq = #{seq}</if>
+            <if test="null != state">and state = #{state}</if>
+            <if test="null != createTime">and create_time = #{createTime}</if>
+            <if test="null != createId">and create_id = #{createId}</if>
+        </where>
+    </sql>
+
+
+    <!-- 递归查询所有资源树 -->
+    <select id="getRecursionTree" resultMap="ResourceTreeMap">
         SELECT
-            sre.res_id,
-            sre.res_code,
-            res_name,
-            res_pid,
-            res_level,
-            res_icon,
-            sre.seq,
-            sp.perm_url
-        FROM sys_resource sre
-            JOIN sys_role_resource srr ON sre.res_id = srr.res_id
-                                          AND EXISTS(SELECT 1
-                                                     FROM sys_role_resource
-                                                     WHERE res_id = #{res_id} AND srr.role_id = role_id)
-            JOIN sys_permission sp ON sp.perm_id = srr.perm_id AND sp.res_code = sre.res_code AND perm_code = 'view'
-        WHERE
-            res_type = 'menu'
-            AND res_pid = #{res_id}
-
-
+            sr.res_id,
+            sr.res_type,
+            sr.res_code,
+            sr.res_name,
+            sr.res_pid,
+            ps.res_name res_pname,
+            sr.res_level,
+            sr.res_icon,
+            sr.seq,
+            sr.state,
+            sr.create_time,
+            sr.create_id
+        FROM sys_resource sr
+            LEFT JOIN sys_resource ps ON ps.res_id = sr.res_pid
+        WHERE sr.res_pid = 0
+        ORDER BY sr.res_pid, sr.seq
     </select>
+
+    <select id="selectChildrenRes" resultMap="ResourceTreeMap" parameterType="int">
+        SELECT
+            sr.res_id,
+            sr.res_type,
+            sr.res_code,
+            sr.res_name,
+            sr.res_pid,
+            ps.res_name res_pname,
+            sr.res_level,
+            sr.res_icon,
+            sr.seq,
+            sr.state,
+            sr.create_time,
+            sr.create_id
+        FROM sys_resource sr
+            LEFT JOIN sys_resource ps ON ps.res_id = sr.res_pid
+        WHERE sr.res_pid = #{res_id}
+        ORDER BY sr.res_pid, sr.seq
+    </select>
+
+    <!-- 序号加操作 -->
+    <update id="updateAdditionSeq" parameterType="cn.hejinyo.model.SysResource">
+        UPDATE sys_resource
+        SET seq = seq + 1
+        WHERE res_pid = #{resPid} AND seq >= #{seq}
+    </update>
+
+    <!-- 序号减操作 -->
+    <update id="updateSubtractionSeq" parameterType="cn.hejinyo.model.SysResource">
+        UPDATE sys_resource
+        SET seq = seq - 1
+        WHERE res_pid = #{resPid} AND seq > #{seq}
+    </update>
 
     <!-- 根据登录名获取菜单信息 -->
     <select id="getUserMenuList" resultMap="BaseUserMenuMap" parameterType="int">
         SELECT
             sre.res_id,
+            sr.role_id,
             sre.res_code,
             res_name,
             res_pid,
@@ -68,11 +135,184 @@
             sre.seq,
             sp.perm_url
         FROM sys_user_role sur
-            JOIN sys_role sr ON sr.role_id = sur.role_id AND sr.state = 0
+            JOIN sys_role sr ON sr.role_id = sur.role_id AND sr.state = 1
             JOIN sys_role_resource srr ON srr.role_id = sr.role_id
-            JOIN sys_resource sre ON sre.res_id = srr.res_id AND res_level = 1
-            JOIN sys_permission sp ON sp.res_code = sre.res_code AND sp.perm_id = srr.perm_id AND res_type = 'menu' AND perm_code = 'view'
+            JOIN sys_resource sre ON sre.res_id = srr.res_id AND sre.res_pid = 0 AND sre.state = 1
+            JOIN sys_permission sp ON sp.res_code = sre.res_code AND sp.perm_id = srr.perm_id AND res_type = 'menu' AND perm_code = 'view' AND sp.state = 1
         WHERE user_id = #{userId}
+        ORDER BY sre.res_pid, sre.seq
     </select>
+
+    <select id="selectChildren" resultMap="BaseUserMenuMap" parameterType="map">
+        SELECT
+            sre.res_id,
+            srr.role_id,
+            sre.res_code,
+            res_name,
+            res_pid,
+            res_level,
+            res_icon,
+            sre.seq,
+            sp.perm_url
+        FROM sys_resource sre
+            JOIN sys_role_resource srr ON sre.res_id = srr.res_id  AND srr.role_id=#{roleId}
+            JOIN sys_permission sp ON sp.perm_id = srr.perm_id AND sp.res_code = sre.res_code AND perm_code = 'view'
+        WHERE
+            res_type = 'menu' AND res_pid = #{resId} AND sre.state = 1
+        ORDER BY sre.res_pid, sre.seq
+    </select>
+
+    <!--  ******************************************分割线*****************************************  -->
+    <delete id="delete" parameterType="java.lang.Integer">
+        DELETE
+        FROM sys_resource
+        WHERE
+            res_id = #{resId}
+    </delete>
+
+    <delete id="deleteArray" parameterType="java.util.List">
+        delete
+        from sys_resource
+        where
+        res_id in
+        <foreach collection="array" index="index" item="item" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </delete>
+
+    <delete id="deleteList" parameterType="java.util.List">
+        delete
+        from sys_resource
+        where
+        res_id in
+        <foreach collection="list" index="index" item="item" open="(" separator="," close=")">
+            #{item.resId}
+        </foreach>
+    </delete>
+
+    <select id="findOne" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+        SELECT
+            sr.res_id,
+            sr.res_type,
+            sr.res_code,
+            sr.res_name,
+            sr.res_pid,
+            ps.res_name res_pname,
+            sr.res_level,
+            sr.res_icon,
+            sr.seq,
+            sr.state,
+            sr.create_time,
+            sr.create_id
+        FROM sys_resource sr
+            LEFT JOIN sys_resource ps ON ps.res_id = sr.res_pid
+        WHERE sr.res_id = #{resId}
+    </select>
+
+    <select id="findAll" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from sys_resource
+    </select>
+
+    <select id="findList" parameterType="cn.hejinyo.model.SysResource" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from sys_resource
+        <include refid="Base_Where_SQL"/>
+    </select>
+
+    <select id="findPage" parameterType="cn.hejinyo.utils.PageQuery" resultMap="BaseResultMap">
+        SELECT *
+        from
+        (SELECT
+        sr.res_id,
+        sr.res_type,
+        sr.res_code,
+        sr.res_name,
+        sr.res_pid,
+        case sr.res_pid when 0 then '/root' else ps.res_name end res_pname,
+        sr.res_level,
+        sr.res_icon,
+        sr.seq,
+        sr.state,
+        sr.create_time,
+        sr.create_id
+        FROM sys_resource sr
+        LEFT JOIN sys_resource ps ON ps.res_id = sr.res_pid
+        <where>
+            <if test="null != resId">sr.res_id = #{resId} or sr.res_pid = #{resId}</if>
+            <if test="null != resType">and sr.res_type like concat('%',#{resType},'%')</if>
+            <if test="null != resCode">and sr.res_code like concat('%',#{resCode},'%')</if>
+            <if test="null != resName">and sr.res_name like concat('%',#{resName},'%')</if>
+            <if test="null != resPid">and sr.res_pid like concat('%',#{resPid},'%')</if>
+            <if test="null != resLevel">and sr.res_level like concat('%',#{resLevel},'%')</if>
+            <if test="null != resIcon">and sr.res_icon like concat('%',#{resIcon},'%')</if>
+            <if test="null != seq">and sr.seq like concat('%',#{seq},'%')</if>
+            <if test="null != state">and sr.state like concat('%',#{state},'%')</if>
+            <if test="null != createTime">and sr.create_time like concat('%',#{createTime},'%')</if>
+            <if test="null != createId">and sr.create_id like concat('%',#{createId},'%')</if>
+        </where>
+        ) as sprirtrcrnrprprlrissctci
+    </select>
+
+    <select id="count" parameterType="cn.hejinyo.model.SysResource" resultType="int">
+        select
+        count(*)
+        from sys_resource
+        <include refid="Base_Where_SQL"/>
+    </select>
+    <select id="exsit" parameterType="cn.hejinyo.model.SysResource" resultType="boolean">
+        select
+        count(*)
+        from sys_resource
+        <include refid="Base_Where_SQL"/>
+    </select>
+
+    <insert id="save" keyProperty="resId" parameterType="cn.hejinyo.model.SysResource" useGeneratedKeys="true">
+        insert into sys_resource
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="null != resType">res_type,</if>
+            <if test="null != resCode">res_code,</if>
+            <if test="null != resName">res_name,</if>
+            <if test="null != resPid">res_pid,</if>
+            <if test="null != resLevel">res_level,</if>
+            <if test="null != resIcon">res_icon,</if>
+            <if test="null != seq">seq,</if>
+            <if test="null != state">state,</if>
+            <if test="null != createTime">create_time,</if>
+            <if test="null != createId">create_id,</if>
+        </trim>
+        values
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="null != resType">#{resType},</if>
+            <if test="null != resCode">#{resCode},</if>
+            <if test="null != resName">#{resName},</if>
+            <if test="null != resPid">#{resPid},</if>
+            <if test="null != resLevel">#{resLevel},</if>
+            <if test="null != resIcon">#{resIcon},</if>
+            <if test="null != seq">#{seq},</if>
+            <if test="null != state">#{state},</if>
+            <if test="null != createTime">#{createTime},</if>
+            <if test="null != createId">#{createId},</if>
+        </trim>
+    </insert>
+
+    <update id="update" parameterType="cn.hejinyo.model.SysResource">
+        update sys_resource
+        <set>
+            <if test="null != resType">res_type = #{resType},</if>
+            <if test="null != resCode">res_code = #{resCode},</if>
+            <if test="null != resName">res_name = #{resName},</if>
+            <if test="null != resPid">res_pid = #{resPid},</if>
+            <if test="null != resLevel">res_level = #{resLevel},</if>
+            <if test="null != resIcon">res_icon = #{resIcon},</if>
+            <if test="null != seq">seq = #{seq},</if>
+            <if test="null != state">state = #{state},</if>
+            <if test="null != createTime">create_time = #{createTime},</if>
+            <if test="null != createId">create_id = #{createId},</if>
+        </set>
+        where res_id = #{resId}
+    </update>
 
 </mapper>

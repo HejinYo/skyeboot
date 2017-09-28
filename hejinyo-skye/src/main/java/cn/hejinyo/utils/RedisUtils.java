@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.*;
 import org.springframework.stereotype.Component;
 
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -104,5 +105,16 @@ public class RedisUtils {
      */
     private <T> T fromJson(String json, Class<T> clazz) {
         return gson.fromJson(json, clazz);
+    }
+
+    /**
+     * 清除key
+     */
+    public String cleanKey(String key) {
+        Set<String> keys = redisTemplate.keys(key);
+        for (String k : keys) {
+            redisTemplate.delete(k);
+        }
+        return keys.toString();
     }
 }

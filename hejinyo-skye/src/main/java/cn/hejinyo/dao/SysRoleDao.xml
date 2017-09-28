@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="cn.hejinyo.dao.SysRoleDao">
-
-    <resultMap id="BaseUserRoleMap" type="sysrole">
+    <resultMap id="BaseResultMap" type="cn.hejinyo.model.SysRole">
         <id column="role_id" jdbcType="INTEGER" property="roleId"/>
         <result column="role_code" jdbcType="VARCHAR" property="roleCode"/>
         <result column="role_name" jdbcType="VARCHAR" property="roleName"/>
@@ -12,8 +11,31 @@
         <result column="create_id" jdbcType="INTEGER" property="createId"/>
     </resultMap>
 
-    <sql id="Base_Role_List">
+    <resultMap id="RoleResourceResultMap" type="cn.hejinyo.model.dto.RoleResourceDTO">
+        <id column="id" jdbcType="INTEGER" property="id"/>
+        <result column="role_id" jdbcType="INTEGER" property="roleId"/>
+        <result column="res_id" jdbcType="VARCHAR" property="resId"/>
+        <result column="perm_id" jdbcType="INTEGER" property="permId"/>
+        <result column="role_code" jdbcType="VARCHAR" property="roleCode"/>
+        <result column="res_code" jdbcType="VARCHAR" property="resCode"/>
+        <result column="res_name" jdbcType="VARCHAR" property="resName"/>
+        <result column="perm_code" jdbcType="VARCHAR" property="permCode"/>
+        <result column="perm_name" jdbcType="VARCHAR" property="permName"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
         role_id, role_code, role_name, role_description, state, create_time, create_id
+    </sql>
+
+    <sql id="Base_Where_SQL">
+        <where>
+            <if test="null != roleCode">and role_code = #{roleCode}</if>
+            <if test="null != roleName">and role_name = #{roleName}</if>
+            <if test="null != roleDescription">and role_description = #{roleDescription}</if>
+            <if test="null != state">and state = #{state}</if>
+            <if test="null != createTime">and create_time = #{createTime}</if>
+            <if test="null != createId">and create_id = #{createId}</if>
+        </where>
     </sql>
 
     <!-- 查找用户编号对应的角色编码字符串 -->
@@ -25,5 +47,161 @@
         WHERE
             ur.user_id = #{userId}
     </select>
+
+    <select id="findPageForRoleResource" parameterType="cn.hejinyo.utils.PageQuery" resultMap="RoleResourceResultMap">
+        SELECT
+        srr.id,
+        srr.res_id,
+        srr.role_id,
+        srr.perm_id,
+        sr.role_code,
+        sre.res_name,
+        sp.res_code,
+        sp.perm_code,
+        sp.perm_name
+        FROM
+        sys_role_resource srr
+        LEFT JOIN sys_role sr ON sr.role_id = srr.role_id
+        LEFT JOIN sys_resource sre ON sre.res_id = srr.res_id
+        LEFT JOIN sys_permission sp ON sp.perm_id = srr.perm_id
+        <where>
+            <if test="null != roleCode">role_code = #{roleCode}</if>
+        </where>
+    </select>
+
+    <delete id="deleteRolePermission" parameterType="java.lang.Integer">
+        DELETE
+        FROM sys_role_resource
+        WHERE
+            role_id = #{roleId}
+    </delete>
+
+    <insert id="saveRolePermission" parameterType="map">
+        INSERT INTO sys_role_resource (role_id, res_id, perm_id)
+        VALUES
+        <foreach collection="permission" index="index" item="item" separator=",">
+            (#{roleId}, #{item.resId}, #{item.permId})
+        </foreach>
+    </insert>
+
+    <select id="roleSelect" resultMap="BaseResultMap">
+        SELECT
+            role_id,
+            role_code,
+            role_name
+        FROM sys_role
+        WHERE state = 1
+    </select>
+
+    <!-- **********************************************分割线***********************************************************-->
+
+    <delete id="delete" parameterType="java.lang.Integer">
+        DELETE
+        FROM sys_role
+        WHERE
+            role_id = #{roleId}
+    </delete>
+
+    <delete id="deleteArray" parameterType="java.util.List">
+        delete
+        from sys_role
+        where
+        role_id in
+        <foreach collection="array" index="index" item="item" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </delete>
+
+    <delete id="deleteList" parameterType="java.util.List">
+        delete
+        from sys_role
+        where
+        role_id in
+        <foreach collection="list" index="index" item="item" open="(" separator="," close=")">
+            #{item.roleId}
+        </foreach>
+    </delete>
+
+    <select id="findOne" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from sys_role
+        where role_id = #{roleId}
+    </select>
+
+    <select id="findAll" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from sys_role
+    </select>
+
+    <select id="findList" parameterType="cn.hejinyo.model.SysRole" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from sys_role
+        <include refid="Base_Where_SQL"/>
+    </select>
+
+    <select id="findPage" parameterType="cn.hejinyo.utils.PageQuery" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from sys_role
+        <where>
+            <if test="null != roleCode">and role_code like concat('%',#{roleCode},'%')</if>
+            <if test="null != roleName">and role_name like concat('%',#{roleName},'%')</if>
+            <if test="null != roleDescription">and role_description like concat('%',#{roleDescription},'%')</if>
+            <if test="null != state">and state like concat('%',#{state},'%')</if>
+            <if test="null != createTime">and create_time like concat('%',#{createTime},'%')</if>
+            <if test="null != createId">and create_id like concat('%',#{createId},'%')</if>
+        </where>
+    </select>
+
+    <select id="count" parameterType="cn.hejinyo.model.SysRole" resultType="int">
+        select
+        count(*)
+        from sys_role
+        <include refid="Base_Where_SQL"/>
+    </select>
+
+    <select id="exsit" parameterType="cn.hejinyo.model.SysRole" resultType="boolean">
+        select
+        count(*)
+        from sys_role
+        <include refid="Base_Where_SQL"/>
+    </select>
+
+    <insert id="save" keyProperty="roleId" parameterType="cn.hejinyo.model.SysRole" useGeneratedKeys="true">
+        insert into sys_role
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="null != roleCode">role_code,</if>
+            <if test="null != roleName">role_name,</if>
+            <if test="null != roleDescription">role_description,</if>
+            <if test="null != state">state,</if>
+            <if test="null != createTime">create_time,</if>
+            <if test="null != createId">create_id,</if>
+        </trim>
+        values
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="null != roleCode">#{roleCode},</if>
+            <if test="null != roleName">#{roleName},</if>
+            <if test="null != roleDescription">#{roleDescription},</if>
+            <if test="null != state">#{state},</if>
+            <if test="null != createTime">#{createTime},</if>
+            <if test="null != createId">#{createId},</if>
+        </trim>
+    </insert>
+
+    <update id="update" parameterType="cn.hejinyo.model.SysRole">
+        update sys_role
+        <set>
+            <if test="null != roleCode">role_code = #{roleCode},</if>
+            <if test="null != roleName">role_name = #{roleName},</if>
+            <if test="null != roleDescription">role_description = #{roleDescription},</if>
+            <if test="null != state">state = #{state},</if>
+            <if test="null != createTime">create_time = #{createTime},</if>
+            <if test="null != createId">create_id = #{createId},</if>
+        </set>
+        where role_id = #{roleId}
+    </update>
 
 </mapper>

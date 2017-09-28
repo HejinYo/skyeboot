@@ -19,7 +19,9 @@ public interface BaseService<T, ID extends Serializable> {
     /**
      * 删除给定多个实体的主键记录
      */
-    int delete(List<T> entity);
+    int deleteArray(ID[] ids);
+
+    int deleteList(List<T> entity);
 
     /**
      * 根据主键查找一条记录

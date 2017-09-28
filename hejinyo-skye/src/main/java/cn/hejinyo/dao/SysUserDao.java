@@ -20,4 +20,8 @@ public interface SysUserDao extends BaseDao<SysUser, Integer> {
      * @return
      */
     CurrentUserDTO getCurrentUser(String userName);
+
+    int saveUserRole(SysUser sysUser);
+
+    int updateUserRole(SysUser sysUser);
 }

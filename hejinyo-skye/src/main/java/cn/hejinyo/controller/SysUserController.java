@@ -11,12 +11,15 @@ import cn.hejinyo.utils.Result;
 import cn.hejinyo.validator.RestfulValid;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 /**
  * @author : HejinYo   hejinyo@gmail.com
@@ -36,7 +39,8 @@ public class SysUserController extends BaseController {
      * @return
      */
     @GetMapping(value = "/{userId}")
-    public Result get(@PathVariable(value = "userId") int userId) {
+    @RequiresPermissions("user:view")
+    public Result get(@PathVariable(value = "userId") Integer userId) {
         SysUser sysUser = sysUserService.findOne(userId);
         if (sysUser == null) {
             return Result.error("用户不存在");
@@ -50,6 +54,7 @@ public class SysUserController extends BaseController {
      * @return
      */
     @GetMapping(value = "/listPage")
+    @RequiresPermissions("user:view")
     public Result list(@RequestParam HashMap<String, Object> paramers) {
         PageInfo<SysUser> userPageInfo = new PageInfo<>(sysUserService.findPage(new PageQuery(paramers)));
         return Result.ok(userPageInfo);
@@ -59,8 +64,9 @@ public class SysUserController extends BaseController {
      * 增加一个用户
      */
     @PostMapping
+    @Transactional
+    @RequiresPermissions("user:create")
     public Result save(@Validated(RestfulValid.POST.class) @RequestBody SysUser sysUser) {
-        System.out.println(sysUser);
         if (sysUserService.isExistUserName(sysUser.getUserName())) {
             return Result.error("用户名已经存在");
         }
@@ -91,11 +97,13 @@ public class SysUserController extends BaseController {
     @SysLogger("更新用户")
     @RequiresPermissions("user:update")
     @PutMapping(value = "/{userId}")
-    public Result update(@Validated(RestfulValid.PUT.class) @RequestBody SysUser sysUser, @PathVariable("userId") int userId) {
+    @Transactional
+    public Result update(@Validated(RestfulValid.PUT.class) @RequestBody SysUser sysUser, @PathVariable("userId") Integer userId) {
         if (1 == userId) {
             return Result.error("admin不允许修改");
         }
         sysUser.setUserId(userId);
+        System.out.println(userId);
         int result = sysUserService.update(sysUser);
         if (result > 0) {
             return Result.ok();
@@ -112,7 +120,7 @@ public class SysUserController extends BaseController {
     @SysLogger("删除用户")
     @RequiresPermissions("user:delete")
     @DeleteMapping(value = "/{userId}")
-    public Result delete(@PathVariable("userId") int userId) {
+    public Result delete(@PathVariable("userId") Integer userId) {
         if (1 == userId) {
             return Result.error("admin不允许被删除");
         }
@@ -121,6 +129,27 @@ public class SysUserController extends BaseController {
             return Result.error("用户不存在");
         }
         int result = sysUserService.delete(sysUser.getUserId());
+        if (result > 0) {
+            return Result.ok("删除成功");
+        }
+        return Result.error("删除失败");
+    }
+
+    /**
+     * 批量删除
+     *
+     * @return
+     */
+    @SysLogger("删除用户")
+    @RequiresPermissions("user:delete")
+    @DeleteMapping(value = "/batch/{userIdList}")
+    public Result delete(@PathVariable("userIdList") Integer[] ids) {
+        for (int userId : ids) {
+            if (1 == userId) {
+                return Result.error("admin不允许被删除");
+            }
+        }
+        int result = sysUserService.deleteArray(ids);
         if (result > 0) {
             return Result.ok("删除成功");
         }
@@ -142,20 +171,4 @@ public class SysUserController extends BaseController {
         }
         return Result.ok();
     }
-
-    /**
-     * 批量删除
-     *
-     * @return
-     */
-    //@RequiresPermissions("user:delete")
-    /*@SysLogger("删除用户")
-    @DeleteMapping(value = "/")
-    public Result delete(List<SysUser> sysUser) {
-        int result = sysUserService.delete(sysUser);
-        if (result > 0) {
-            return Result.ok("批量删除成功");
-        }
-        return Result.error("批量删除失败");
-    }*/
 }

@@ -13,6 +13,9 @@
         <result column="state" jdbcType="INTEGER" property="state"/>
         <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
         <result column="create_id" jdbcType="INTEGER" property="createId"/>
+        <result column="role_id" jdbcType="INTEGER" property="roleId"/>
+        <result column="role_name" jdbcType="VARCHAR" property="roleName"/>
+        <result column="role_code" jdbcType="VARCHAR" property="roleCode"/>
     </resultMap>
 
     <sql id="Base_Column_List">
@@ -33,6 +36,65 @@
             <if test="null != createId">and create_id = #{createId}</if>
         </where>
     </sql>
+
+    <select id="findOne" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+        SELECT
+            su.user_id,
+            su.user_name,
+            su.user_pwd,
+            su.user_salt,
+            su.email,
+            su.phone,
+            su.login_ip,
+            su.login_time,
+            su.state,
+            su.create_time,
+            su.create_id,
+            sr.role_id,
+            sr.role_name,
+            sr.role_code
+        FROM sys_user su
+            LEFT JOIN sys_user_role sur ON sur.user_id = su.user_id
+            LEFT JOIN sys_role sr ON sr.role_id = sur.role_id
+        WHERE su.user_id = #{userId}
+    </select>
+
+    <select id="findPage" parameterType="cn.hejinyo.utils.PageQuery" resultMap="BaseResultMap">
+        select * from
+        (select
+        su.user_id, su.user_name, su.user_pwd, su.user_salt, su.email, su.phone, su.login_ip,
+        su.login_time, su.state, su.create_time, su.create_id,sr.role_id,sr.role_name,sr.role_code
+        from sys_user su
+        LEFT JOIN sys_user_role sur on sur.user_id = su.user_id
+        left join sys_role sr on sr.role_id = sur.role_id) as n
+        <where>
+            <if test="null != userName">and user_name like concat('%',#{userName},'%')</if>
+            <if test="null != userPwd">and user_pwd like concat('%',#{userPwd},'%')</if>
+            <if test="null != userSalt">and user_salt like concat('%',#{userSalt},'%')</if>
+            <if test="null != email">and email like concat('%',#{email},'%')</if>
+            <if test="null != phone">and phone like concat('%',#{phone},'%')</if>
+            <if test="null != loginIp">and login_ip like concat('%',#{loginIp},'%')</if>
+            <if test="null != loginTime">and login_time like concat('%',#{loginTime},'%')</if>
+            <if test="null != state">and state like concat('%',#{state},'%')</if>
+            <if test="null != createTime">and create_time like concat('%',#{createTime},'%')</if>
+            <if test="null != createId">and create_id like concat('%',#{createId},'%')</if>
+            <if test="null != roleName">and role_name like concat('%',#{roleName},'%')</if>
+        </where>
+    </select>
+
+    <!-- 分配角色 -->
+    <insert id="saveUserRole" parameterType="cn.hejinyo.model.SysUser">
+        INSERT INTO sys_user_role (user_id, role_id)
+        VALUES (#{userId}, #{roleId})
+    </insert>
+
+    <!-- 修改角色 -->
+    <insert id="updateUserRole" parameterType="cn.hejinyo.model.SysUser">
+        UPDATE sys_user_role
+        SET role_id = #{roleId}
+        WHERE user_id = #{userId}
+    </insert>
+
 
     <delete id="delete" parameterType="java.lang.Integer">
         DELETE
@@ -61,13 +123,6 @@
         </foreach>
     </delete>
 
-    <select id="findOne" parameterType="java.lang.Integer" resultMap="BaseResultMap">
-        select
-        <include refid="Base_Column_List"/>
-        from sys_user
-        where user_id = #{userId}
-    </select>
-
     <select id="findAll" resultMap="BaseResultMap">
         select
         <include refid="Base_Column_List"/>
@@ -79,24 +134,6 @@
         <include refid="Base_Column_List"/>
         from sys_user
         <include refid="Base_Where_SQL"/>
-    </select>
-
-    <select id="findPage" parameterType="cn.hejinyo.utils.PageQuery" resultMap="BaseResultMap">
-        select
-        <include refid="Base_Column_List"/>
-        from sys_user
-        <where>
-            <if test="null != userName">and user_name like concat('%',#{userName},'%')</if>
-            <if test="null != userPwd">and user_pwd like concat('%',#{userPwd},'%')</if>
-            <if test="null != userSalt">and user_salt like concat('%',#{userSalt},'%')</if>
-            <if test="null != email">and email like concat('%',#{email},'%')</if>
-            <if test="null != phone">and phone like concat('%',#{phone},'%')</if>
-            <if test="null != loginIp">and login_ip like concat('%',#{loginIp},'%')</if>
-            <if test="null != loginTime">and login_time like concat('%',#{loginTime},'%')</if>
-            <if test="null != state">and state like concat('%',#{state},'%')</if>
-            <if test="null != createTime">and create_time like concat('%',#{createTime},'%')</if>
-            <if test="null != createId">and create_id like concat('%',#{createId},'%')</if>
-        </where>
     </select>
 
     <select id="count" parameterType="cn.hejinyo.model.SysUser">

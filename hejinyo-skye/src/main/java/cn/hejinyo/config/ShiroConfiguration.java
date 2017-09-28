@@ -95,6 +95,7 @@ public class ShiroConfiguration {
         // 拦截器链
         Map<String, String> filterMap = new LinkedHashMap<>();
 
+        filterMap.put("/test/**", "anon");
         filterMap.put("/", "anon");
         filterMap.put("/login/**", "anon");
         filterMap.put("/druid/**", "anon");

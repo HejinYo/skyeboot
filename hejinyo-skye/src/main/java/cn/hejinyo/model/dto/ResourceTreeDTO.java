@@ -1,5 +1,6 @@
-package cn.hejinyo.model;
+package cn.hejinyo.model.dto;
 
+import cn.hejinyo.model.SysResource;
 import com.alibaba.fastjson.annotation.JSONField;
 import lombok.Data;
 
@@ -8,14 +9,12 @@ import java.util.Date;
 import java.util.List;
 
 /**
- * @author : HejinYo   hejinyo@gmail.com
- * @date : 2017/4/9 14:32
- * @Description : 资源实体类
+ * @author : HejinYo   hejinyo@gmail.com     2017/9/25 12:57
+ * @apiNote :
  */
 @Data
-public class SysResource implements Serializable {
+public class ResourceTreeDTO implements Serializable {
     private static final long serialVersionUID = 1L;
-
     private Integer resId; //资源编号
     private String resType;//资源类型
     private String resCode;//资源编码
@@ -29,5 +28,5 @@ public class SysResource implements Serializable {
     @JSONField(format = "yyyy-MM-dd HH:mm:ss")
     private Date createTime;//创建时间
     private Integer createId;//创建人员ID
-    private List<SysResource> childrenRes;//子资源
+    private List<ResourceTreeDTO> childrenRes;//子资源
 }

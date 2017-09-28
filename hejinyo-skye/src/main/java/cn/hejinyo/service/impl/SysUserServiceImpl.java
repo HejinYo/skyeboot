@@ -6,15 +6,20 @@ import cn.hejinyo.exception.InfoException;
 import cn.hejinyo.model.SysUser;
 import cn.hejinyo.model.dto.CurrentUserDTO;
 import cn.hejinyo.service.SysUserService;
+import cn.hejinyo.utils.RedisKeys;
+import cn.hejinyo.utils.RedisUtils;
 import cn.hejinyo.utils.ShiroUtils;
 import cn.hejinyo.utils.StringUtils;
 import org.apache.shiro.crypto.SecureRandomNumberGenerator;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
 
 @Service
 public class SysUserServiceImpl extends BaseServiceImpl<SysUserDao, SysUser, Integer> implements SysUserService {
+    @Autowired
+    private RedisUtils redisUtils;
 
     @Override
     public CurrentUserDTO getCurrentUser(String userName) {
@@ -42,7 +47,12 @@ public class SysUserServiceImpl extends BaseServiceImpl<SysUserDao, SysUser, Int
         newUser.setCreateTime(new Date());
         //默认状态：正常
         newUser.setState(1);
-        return baseDao.save(newUser);
+        int result = baseDao.save(newUser);
+        if (result > 0) {
+            newUser.setRoleId(sysUser.getRoleId());
+            baseDao.saveUserRole(newUser);
+        }
+        return result;
     }
 
     @Override
@@ -75,19 +85,17 @@ public class SysUserServiceImpl extends BaseServiceImpl<SysUserDao, SysUser, Int
         Integer state = sysUser.getState();
 
         //校验用户名是否修改
-        if (StringUtils.isNotNull(userStr)) {
-            String userName = StringUtils.toLowerCase(userStr);
-            if (!userName.equals(sysUserOld.getUserName())) {
-                if (isExistUserName(userName)) {
-                    //新的用户名已经存在
-                    throw new InfoException("用户名已经存在");
-                }
-                newUser.setUserName(userName);
-                flag = true;
+        String userName = StringUtils.toLowerCase(userStr);
+        if (!userName.equals(sysUserOld.getUserName())) {
+            if (isExistUserName(userName)) {
+                //新的用户名已经存在
+                throw new InfoException("用户名已经存在");
             }
+            newUser.setUserName(userName);
+            flag = true;
         }
         //密码是否修改
-        if (StringUtils.isNotNull(pwdStr)) {
+      /*  if (StringUtils.isNotNull(pwdStr)) {
             //加密新密码
             String userPwd = ShiroUtils.userPassword(sysUser.getUserPwd(), sysUserOld.getUserSalt());
             if (!userPwd.equals(sysUserOld.getUserPwd())) {
@@ -98,46 +106,49 @@ public class SysUserServiceImpl extends BaseServiceImpl<SysUserDao, SysUser, Int
                 newUser.setUserPwd(ShiroUtils.userPassword(sysUser.getUserPwd(), salt));
                 flag = true;
             }
-        }
+        }*/
         //邮箱是否修改
-        if (StringUtils.isNotNull(email)) {
-            if (!email.equals(sysUserOld.getEmail())) {
-                newUser.setEmail(email);
-                flag = true;
-            }
+        if (!email.equals(sysUserOld.getEmail())) {
+            newUser.setEmail(email);
+            flag = true;
         }
         //手机是否修改
-        if (StringUtils.isNotNull(phone)) {
-            if (!phone.equals(sysUserOld.getPhone())) {
-                newUser.setPhone(phone);
-                flag = true;
-            }
+        if (!phone.equals(sysUserOld.getPhone())) {
+            newUser.setPhone(phone);
+            flag = true;
         }
         //登录IP是否修改
-        if (StringUtils.isNotNull(loginIp)) {
-            if (!loginIp.equals(sysUserOld.getLoginIp())) {
-                newUser.setLoginIp(loginIp);
-                flag = true;
-            }
-        }
+       /* if (!loginIp.equals(sysUserOld.getLoginIp())) {
+            newUser.setLoginIp(loginIp);
+            flag = true;
+        }*/
         //登录时间是否修改
-        if (null != loginTime) {
-            if (!loginTime.equals(sysUserOld.getLoginTime())) {
-                newUser.setLoginTime(loginTime);
-                flag = true;
-            }
+        if (!loginTime.equals(sysUserOld.getLoginTime())) {
+            newUser.setLoginTime(loginTime);
+            flag = true;
         }
         //状态是否修改
-        if (null != state) {
-            if (!state.equals(sysUserOld.getState())) {
-                newUser.setState(state);
-                flag = true;
+        if (!state.equals(sysUserOld.getState())) {
+            newUser.setState(state);
+            flag = true;
+        }
+
+        int result = 0;
+        //角色是否修改
+        if (!sysUser.getRoleId().equals(sysUserOld.getRoleId())) {
+            newUser.setRoleId(sysUser.getRoleId());
+            result = baseDao.updateUserRole(newUser);
+            if (result == 0) {
+                result = baseDao.saveUserRole(newUser);
             }
+            //清除redis中的权限缓存
+            redisUtils.cleanKey(RedisKeys.getAuthCacheKey(sysUser.getUserName() + "*"));
         }
+
         if (flag) {
-            return baseDao.update(newUser);
+            result = baseDao.update(newUser);
         }
-        return 0;
+        return result;
     }
 
     @Override

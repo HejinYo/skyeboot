@@ -15,9 +15,8 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import javax.servlet.http.HttpServletResponse;
 
 /**
- * @author : HejinYo   hejinyo@gmail.com
- * @date : 2017/8/13 19:12
- * @Description :
+ * @author : HejinYo   hejinyo@gmail.com 2017/8/13 19:12
+ * @apiNote :
  */
 @RestControllerAdvice
 public class ExceptionHandle {
@@ -33,6 +32,13 @@ public class ExceptionHandle {
         return Result.error(e.getCode(), e.getMessage());
     }
 
+    @ResponseStatus(HttpStatus.OK)
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public Result validException(MethodArgumentNotValidException mnve) {
+        //e.printStackTrace();
+        return Result.error(mnve.getBindingResult().getFieldError().getDefaultMessage());
+    }
+
     /**
      * 500 Internal Server Error
      */
@@ -45,9 +51,8 @@ public class ExceptionHandle {
             return Result.error(HttpStatus.METHOD_NOT_ALLOWED.getReasonPhrase());
         } else if (ex instanceof HttpMediaTypeNotSupportedException) {
             return Result.error(HttpStatus.UNSUPPORTED_MEDIA_TYPE.getReasonPhrase());
-        } else if (ex instanceof MethodArgumentNotValidException) {
-            MethodArgumentNotValidException mnve = (MethodArgumentNotValidException) ex;
-            return Result.error(mnve.getBindingResult().getFieldError().getDefaultMessage());
+        } else {
+            ex.printStackTrace();
         }
         logger.error("系统发生未知错误异常", ex);
         return Result.error("未知错误:" + ex.getMessage());

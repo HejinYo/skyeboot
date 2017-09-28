@@ -1,5 +1,6 @@
 package cn.hejinyo.model;
 
+import com.alibaba.fastjson.annotation.JSONField;
 import lombok.Data;
 
 import java.io.Serializable;
@@ -20,6 +21,7 @@ public class SysRole implements Serializable {
     private String roleDescription;//角色描述
     private Integer seq;//排序号
     private Integer state; //状态  0：正常；1：锁定；-1：禁用(删除)
+    @JSONField(format = "yyyy-MM-dd HH:mm:ss")
     private Date createTime; //创建时间
     private Integer createId;//创建人员ID
 }

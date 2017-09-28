@@ -23,8 +23,13 @@ public class BaseServiceImpl<M extends BaseDao<T, ID>, T, ID extends Serializabl
     }
 
     @Override
-    public int delete(List<T> entity) {
-        return baseDao.delete(entity);
+    public int deleteArray(ID[] ids) {
+        return baseDao.deleteArray(ids);
+    }
+
+    @Override
+    public int deleteList(List<T> entity) {
+        return baseDao.deleteList(entity);
     }
 
     @Override

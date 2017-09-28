@@ -39,4 +39,8 @@ public class SysUser implements Serializable {
     @JSONField(format = "yyyy-MM-dd HH:mm:ss")
     private Date createTime; //创建时间
     private Integer createId;//创建人员ID
+
+    private Integer roleId;//用户角色
+    private String roleCode;//角色编码
+    private String roleName;//角色名称
 }

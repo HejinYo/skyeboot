@@ -19,7 +19,9 @@ public interface BaseDao<T, ID extends Serializable> {
     /**
      * 删除给定多个实体的主键记录
      */
-    Integer delete(List<T> entity);
+    Integer deleteArray(ID[] ids);
+
+    Integer deleteList(List<T> entity);
 
     /**
      * 根据主键查找一条记录

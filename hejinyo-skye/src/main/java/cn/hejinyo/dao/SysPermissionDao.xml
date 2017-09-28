@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="cn.hejinyo.dao.SysPermissionDao">
-
-    <resultMap id="BasePermissionMap" type="syspermission">
+    <resultMap id="BaseResultMap" type="cn.hejinyo.model.SysPermission">
         <id column="perm_id" jdbcType="INTEGER" property="permId"/>
         <result column="res_code" jdbcType="VARCHAR" property="resCode"/>
         <result column="perm_code" jdbcType="VARCHAR" property="permCode"/>
@@ -13,17 +12,188 @@
         <result column="create_id" jdbcType="INTEGER" property="createId"/>
     </resultMap>
 
-    <sql id="Base_Permission_List">
+    <resultMap id="RolePermissionResultMap" type="cn.hejinyo.model.dto.RolePermissionTreeDTO">
+        <result column="red_id" jdbcType="INTEGER" property="redId"/>
+        <result column="perm_id" jdbcType="INTEGER" property="permId"/>
+        <result column="res_code" jdbcType="VARCHAR" property="resCode"/>
+        <result column="perm_code" jdbcType="VARCHAR" property="permCode"/>
+        <result column="res_name" jdbcType="VARCHAR" property="resName"/>
+        <result column="perm_name" jdbcType="VARCHAR" property="permName"/>
+        <result column="type" jdbcType="VARCHAR" property="type"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
         perm_id, res_code, perm_code, perm_name, perm_url, state, create_time, create_id
     </sql>
 
+    <sql id="Base_Where_SQL">
+        <where>
+            <if test="null != resCode">and res_code = #{resCode}</if>
+            <if test="null != permCode">and perm_code = #{permCode}</if>
+            <if test="null != permName">and perm_name = #{permName}</if>
+            <if test="null != permUrl">and perm_url = #{permUrl}</if>
+            <if test="null != state">and state = #{state}</if>
+            <if test="null != createTime">and create_time = #{createTime}</if>
+            <if test="null != createId">and create_id = #{createId}</if>
+        </where>
+    </sql>
+
     <select id="getUserPermisSet" resultType="String" parameterType="int">
-        select concat(sp.res_code, ':', sp.perm_code) perm_code
-        	from sys_user_role sur
-        	left join sys_role sr on sr.role_id = sur.role_id
-        	left join sys_role_resource srr on srr.role_id=sr.role_id
-        	left join sys_permission sp on sp.perm_id = srr.perm_id
-        where sur.user_id = #{userId}
+        SELECT concat(sp.res_code, ':', sp.perm_code) perm_code
+        FROM sys_user_role sur
+            LEFT JOIN sys_role sr ON sr.role_id = sur.role_id
+            LEFT JOIN sys_role_resource srr ON srr.role_id = sr.role_id
+            LEFT JOIN sys_permission sp ON sp.perm_id = srr.perm_id
+        WHERE sur.user_id = #{userId}
     </select>
+
+    <select id="getRolePermissionSet" resultType="String" parameterType="int">
+        SELECT concat(sp.res_code, ':', sp.perm_code) perm_code
+        FROM sys_permission sp
+            LEFT JOIN sys_role_resource srr ON sp.perm_id = srr.perm_id
+        WHERE srr.role_id = #{roleId}
+    </select>
+
+    <select id="findResourceList" parameterType="java.lang.Integer" resultMap="RolePermissionResultMap">
+        SELECT
+            res_id,
+            res_code,
+            res_name,
+            'resource' type
+        FROM sys_resource
+        WHERE res_pid = #{resPid}
+        ORDER BY res_pid, seq
+    </select>
+
+    <select id="findPermissionList" parameterType="java.lang.String" resultMap="RolePermissionResultMap">
+        SELECT
+            concat(sp.res_code, ':', sp.perm_code) res_code,
+            'permission'                           type,
+            sp.perm_name                           res_name,
+            sp.perm_name,
+            sr.res_id,
+            sp.perm_id,
+            sp.perm_code
+        FROM sys_permission sp
+            LEFT JOIN sys_resource sr ON sr.res_code = sp.res_code AND sr.res_code IS NOT NULL
+        WHERE sp.res_code = #{resCode}
+        ORDER BY sr.res_pid, sr.seq
+    </select>
+
+
+    <!-- *******************************************分割线***********************************************************-->
+
+    <delete id="delete" parameterType="java.lang.Integer">
+        DELETE
+        FROM sys_permission
+        WHERE
+            perm_id = #{permId}
+    </delete>
+
+    <delete id="deleteArray" parameterType="java.util.List">
+        delete
+        from sys_permission
+        where
+        perm_id in
+        <foreach collection="array" index="index" item="item" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </delete>
+
+    <delete id="deleteList" parameterType="java.util.List">
+        delete
+        from sys_permission
+        where
+        perm_id in
+        <foreach collection="list" index="index" item="item" open="(" separator="," close=")">
+            #{item.permId}
+        </foreach>
+    </delete>
+
+    <select id="findOne" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from sys_permission
+        where perm_id = #{permId}
+    </select>
+
+    <select id="findAll" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from sys_permission
+    </select>
+
+    <select id="findList" parameterType="cn.hejinyo.model.SysPermission" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from sys_permission
+        <include refid="Base_Where_SQL"/>
+    </select>
+
+    <select id="findPage" parameterType="cn.hejinyo.utils.PageQuery" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from sys_permission
+        <where>
+            <if test="null != resCode">and res_code = #{resCode}</if>
+            <if test="null != permCode">and perm_code like concat('%',#{permCode},'%')</if>
+            <if test="null != permName">and perm_name like concat('%',#{permName},'%')</if>
+            <if test="null != permUrl">and perm_url like concat('%',#{permUrl},'%')</if>
+            <if test="null != state">and state like concat('%',#{state},'%')</if>
+            <if test="null != createTime">and create_time like concat('%',#{createTime},'%')</if>
+            <if test="null != createId">and create_id like concat('%',#{createId},'%')</if>
+        </where>
+    </select>
+
+    <select id="count" parameterType="cn.hejinyo.model.SysPermission">
+        select
+        count(*)
+        from sys_permission
+        <include refid="Base_Where_SQL"/>
+    </select>
+
+    <select id="exsit" resultType="boolean" parameterType="cn.hejinyo.model.SysPermission">
+        select
+        count(*)
+        from sys_permission
+        <include refid="Base_Where_SQL"/>
+    </select>
+
+    <insert id="save" keyProperty="permId" parameterType="cn.hejinyo.model.SysPermission" useGeneratedKeys="true">
+        insert into sys_permission
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="null != resCode">res_code,</if>
+            <if test="null != permCode">perm_code,</if>
+            <if test="null != permName">perm_name,</if>
+            <if test="null != permUrl">perm_url,</if>
+            <if test="null != state">state,</if>
+            <if test="null != createTime">create_time,</if>
+            <if test="null != createId">create_id,</if>
+        </trim>
+        values
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="null != resCode">#{resCode},</if>
+            <if test="null != permCode">#{permCode},</if>
+            <if test="null != permName">#{permName},</if>
+            <if test="null != permUrl">#{permUrl},</if>
+            <if test="null != state">#{state},</if>
+            <if test="null != createTime">#{createTime},</if>
+            <if test="null != createId">#{createId},</if>
+        </trim>
+    </insert>
+
+    <update id="update" parameterType="cn.hejinyo.model.SysPermission">
+        update sys_permission
+        <set>
+            <if test="null != resCode">res_code = #{resCode},</if>
+            <if test="null != permCode">perm_code = #{permCode},</if>
+            <if test="null != permName">perm_name = #{permName},</if>
+            <if test="null != permUrl">perm_url = #{permUrl},</if>
+            <if test="null != state">state = #{state},</if>
+            <if test="null != createTime">create_time = #{createTime},</if>
+            <if test="null != createId">create_id = #{createId},</if>
+        </set>
+        where perm_id = #{permId}
+    </update>
 
 </mapper>

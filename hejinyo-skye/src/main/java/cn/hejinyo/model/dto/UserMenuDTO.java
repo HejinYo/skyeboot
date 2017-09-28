@@ -1,5 +1,6 @@
 package cn.hejinyo.model.dto;
 
+import com.alibaba.fastjson.annotation.JSONField;
 import lombok.Data;
 
 import java.io.Serializable;
@@ -13,6 +14,8 @@ import java.util.List;
 @Data
 public class UserMenuDTO implements Serializable {
     private static final long serialVersionUID = 1L;
+    @JSONField(deserialize = false)
+    private Integer roleId;//角色编码
     private Integer mid;//菜单编号
     private String redCode;//资源编码
     private String mname;//菜单名字

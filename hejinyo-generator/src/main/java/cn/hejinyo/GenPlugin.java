@@ -268,8 +268,15 @@ public class GenPlugin extends PluginAdapter {
         XmlElement select = new XmlElement("select");
         select.addAttribute(new Attribute("id", id));
         StringBuilder selectStr = new StringBuilder();
-        if ("count".equals(id) || "exsit".equals(id)) {
-            select.addAttribute(new Attribute("parameterType", getParameterType(pkColumn)));
+        if ("count".equals(id)) {
+            select.addAttribute(new Attribute("parameterType", modelName));
+            select.addAttribute(new Attribute("resultType", "int"));
+            selectStr.append("select\n\t\t").append("count(*)").append("\n\t").append("from ").append(tableName);
+            selectStr.append("\n\t\t").append("<include refid=\"Base_Where_SQL\" />");
+            select.addElement(new TextElement(selectStr.toString()));
+        } else if ("exsit".equals(id)) {
+            select.addAttribute(new Attribute("parameterType", modelName));
+            select.addAttribute(new Attribute("resultType", "boolean"));
             selectStr.append("select\n\t\t").append("count(*)").append("\n\t").append("from ").append(tableName);
             selectStr.append("\n\t\t").append("<include refid=\"Base_Where_SQL\" />");
             select.addElement(new TextElement(selectStr.toString()));

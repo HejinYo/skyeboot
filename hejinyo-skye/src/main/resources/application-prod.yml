@@ -2,16 +2,21 @@ server:
   port: 80
   context-path: /
 spring:
+  redis:
+    database: 0
+    host: 127.0.0.1
+    port: 29
+    password: redhat     # 密码（默认为空）
   datasource:
     name: mysql_druid
     driver-class-name: com.mysql.jdbc.Driver
-    url: jdbc:mysql://bdm287600448.my3w.com:3306/bdm287600448_db?useUnicode=true&characterEncoding=utf-8
-    username: bdm287600448
-    password: Sy9esttUFGotN3n6Y5rWkyg/LLJNKCSVis4c6/63IHA18yblEObfF13UO84L1yZpD0UBYTPbfW+WcMYTGkGsmw==
+    url: jdbc:mysql://127.0.0.1:3306/yoyo?useUnicode=true&characterEncoding=utf-8
+    username: root
+    password: XroRXpiGU7vJeuQrAnZ8FhA4+BEzU9x45IabHN5yzo8bNhm2VXcUG4XdMf1RxNP5CQmbRr05/S/bsNvOcnSaHA==
     sql-script-encoding: UTF-8
     druid:
       filter.config.enabled: true
-      connection-properties: config.decrypt=true;config.decrypt.key=MFwwDQYJKoZIhvcNAQEBBQADSwAwSAJBAK++MpKUcFIxrxgCPi5jhyYAFfk6g+sHNLAuW4gLal9ABV9Mhucu61t1fW2Owyf3DpqCOYFJLoXioctwQ925/9UCAwEAAQ==
+      connection-properties: config.decrypt=true;config.decrypt.key=MFwwDQYJKoZIhvcNAQEBBQADSwAwSAJBALirgbRwt9we2+zKDMwEscyBxd901teyUNDexKpqEOMR943gmUhpBPCvqpZPp04KAxHkt612njXgjwJOAVm0kZECAwEAAQ==
       initial-size: 1
       min-idle: 1
       max-active: 20
