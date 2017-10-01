@@ -52,20 +52,23 @@ public class WechatController {
         replyMessage.setToUserName(message.getFromUserName());
         replyMessage.setCreateTime(String.valueOf(System.currentTimeMillis()));
         replyMessage.setMsgType(message.getMsgType());
-        String conten = "";
         String mess = message.getContent();
         if (mess.contains("天气")) {
             String citys = mess.replace("天气", "").replace(" ", "");
             if (StringUtils.isEmpty(citys.trim())) {
                 citys = "北京";
             }
-            conten = wechatJokeService.weater(citys.trim());
+            replyMessage.setContent(wechatJokeService.weater(citys.trim()));
         } else if (mess.contains("笑话")) {
-            conten = wechatJokeService.getRandomWechatJoke().getContent();
+            replyMessage.setContent(wechatJokeService.getRandomWechatJoke().getContent());
         } else {
-            conten = "你发送的消息为：" + message.getContent();
+            replyMessage.setFromUserName(message.getToUserName());
+            replyMessage.setToUserName(message.getFromUserName());
+            replyMessage.setCreateTime(String.valueOf(System.currentTimeMillis()));
+            replyMessage.setMsgType(message.getMsgType());
+            replyMessage.setMediaId("100000003");
+            replyMessage.setContent(mess);
         }
-        replyMessage.setContent(conten);
 
         System.out.println(replyMessage);
         return replyMessage.toString();

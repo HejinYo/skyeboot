@@ -123,9 +123,11 @@ public class SysUserServiceImpl extends BaseServiceImpl<SysUserDao, SysUser, Int
             flag = true;
         }*/
         //登录时间是否修改
-        if (!loginTime.equals(sysUserOld.getLoginTime())) {
-            newUser.setLoginTime(loginTime);
-            flag = true;
+        if (null != loginTime) {
+            if (!loginTime.equals(sysUserOld.getLoginTime())) {
+                newUser.setLoginTime(loginTime);
+                flag = true;
+            }
         }
         //状态是否修改
         if (!state.equals(sysUserOld.getState())) {

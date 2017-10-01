@@ -16,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.UUID;
 
 
 //@CrossOrigin(origins = "http://localhost:8080")
@@ -78,9 +79,8 @@ public class LoginController extends BaseController {
     }
 
 
-
     /**
-     * 文件上传
+     * 单文件上传获取token
      */
     @GetMapping(value = "/fileUploadToken")
     public Result uploadUserAvatar() {
@@ -89,6 +89,8 @@ public class LoginController extends BaseController {
         config.setQiniuSecretKey("qodIX8q2zqaX4eSAiOvcS1YNLeKU_cxyNtSFkWf9");
         config.setQiniuBucketName("skye-user-avatar");
         String token = Auth.create(config.getQiniuAccessKey(), config.getQiniuSecretKey()).uploadToken(config.getQiniuBucketName());
-        return Result.ok("获取成功", token);
+        return Result.ok(UUID.randomUUID().toString(), token);
     }
+
+
 }

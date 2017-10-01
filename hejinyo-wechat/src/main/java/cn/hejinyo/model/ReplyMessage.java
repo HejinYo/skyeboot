@@ -15,6 +15,7 @@ public class ReplyMessage {
     private String CreateTime;
     private String MsgType;
     private String Content;
+    private String MediaId;
 
     public String getToUserName() {
         return ToUserName;
@@ -61,6 +62,15 @@ public class ReplyMessage {
         Content = content;
     }
 
+    public String getMediaId() {
+        return MediaId;
+    }
+
+    @XmlElement(name = "MediaId")
+    public void setMediaId(String mediaId) {
+        MediaId = mediaId;
+    }
+
     @Override
     public String toString() {
         return "<xml>" +
@@ -69,6 +79,7 @@ public class ReplyMessage {
                 "<CreateTime>" + CreateTime + "</CreateTime>" +
                 "<MsgType>" + MsgType + "</MsgType>" +
                 "<Content>" + Content + "</Content>" +
+                "<MediaId>" + MediaId + "</MediaId>" +
                 "</xml>";
     }
 }
