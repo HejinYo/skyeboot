@@ -1,5 +1,5 @@
 ## 简介
-skyeboot 是一个基于Spring Boot & MyBatis的纯后端项目，可用于管理平台和快速构建中小型API、RESTful API项目；
+skyeboot 是一个基于Spring Boot & MyBatis的纯后端项目，可用于管理平台和快速构建中小型API、RESTful API项目；目前主要完成了用户管理，权限管理和资源管理模块
 ## 特征
 + 基于SpringBoot，MybBtis，MySQL
 + 基于RBAC的权限管理，使用Shiro实现，认证和授权数据使用redis进行缓存
